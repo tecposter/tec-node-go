@@ -18,10 +18,11 @@ type draftStT struct {
 }
 
 type draftT struct {
-	Pid string
-	Uid string
-	Type string
-	Content string
+	Pid string `json:"pid"`
+	Uid string `json:"uid"`
+	Type string `json:"type"`
+	Prev string `json:"prev"`
+	Content string `json:"content"`
 }
 
 func ListDraft(ctx context.Context, input map[string]interface{}) (map[string]interface{}, error) {
@@ -54,6 +55,7 @@ func FetchDraft(ctx context.Context, input map[string]interface{}) (map[string]i
 		"pid": draft.Pid,
 		"uid": draft.Uid,
 		"type": draft.Type,
+		"prev": draft.Prev,
 		"content": draft.Content}, nil
 }
 
@@ -72,6 +74,19 @@ func SaveDraft(ctx context.Context, input map[string]interface{}) (map[string]in
 	getUserDraftSt().saveDraft(&draft)
 
 	return map[string]interface{}{"uid": draft.Uid, "pid": draft.Pid, "type": draft.Type, "content": draft.Content}, nil
+}
+
+func RemoveDraft(ctx context.Context, input map[string]interface{}) (map[string]interface{}, error) {
+	uid, err := getUid(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	pid := input["pid"].(string)
+
+	getUserDraftSt().removeDraft(uid, pid)
+
+	return map[string]interface{}{}, nil
 }
 
 
@@ -100,6 +115,11 @@ func (st *userDraftStT) saveDraft(draft *draftT) {
 	getDraftSt().save(draft)
 }
 
+func (st *userDraftStT) removeDraft(uid, pid string) {
+	st.getDraftSt(uid).remove(pid)
+	getDraftSt().remove(pid)
+}
+
 func (st *userDraftStT) getDraftSt(uid string) *draftStT {
 	if val, ok := st.sm.Load(uid); ok {
 		return val.(*draftStT)
@@ -114,6 +134,11 @@ func (st *userDraftStT) getDraftSt(uid string) *draftStT {
 func (st *draftStT) save(draft *draftT) {
 	//log.Println("draft.Pid: ", draft.Pid)
 	st.sm.Store(draft.Pid, draft)
+}
+
+func (st *draftStT) remove(pid string) {
+	//log.Println("draft.Pid: ", draft.Pid)
+	st.sm.Delete(pid)
 }
 
 func (st *draftStT) rg(f func(key, val interface{}) bool) {

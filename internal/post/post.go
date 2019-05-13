@@ -5,9 +5,11 @@ import (
 	"errors"
 	"sync"
 	"time"
+	"regexp"
 	"github.com/google/uuid"
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/tecposter/tec-server-go/third/ipfs"
+	"github.com/tecposter/tec-server-go/internal/wicc"
 	//"github.com/tecposter/tec-server-go/third/mapstructure"
 )
 
@@ -16,6 +18,7 @@ type postT struct {
 	Uid string `json:"uid"`
 	Type string `json:"type"`
 	Cid string `json:"cid"`
+	Prev string `json:"prev"`
 }
 
 func Create(ctx context.Context, input map[string]interface{}) (map[string]interface{}, error) {
@@ -31,8 +34,29 @@ func Create(ctx context.Context, input map[string]interface{}) (map[string]inter
 	}
 
 	s := base58.Encode(b)
+	SaveDraft(ctx, map[string]interface{}{"pid": s, "type": "markdown", "content": "# title \n"})
 	return map[string]interface{}{"pid": s}, nil
 }
+
+func Edit(ctx context.Context, input map[string]interface{}) (map[string]interface{}, error) {
+	cid := input["cid"].(string)
+
+	post, e := fetchPost(cid)
+	if e != nil {
+		return nil, e
+	}
+
+	draft := getDraftSt().fetch(post["pid"].(string))
+
+	if draft == nil || draft.Prev != cid {
+		post["prev"] = post["cid"]
+		delete(post, "cid")
+		SaveDraft(ctx, post)
+	}
+
+	return map[string]interface{}{"pid": post["pid"]}, nil
+}
+
 
 func List(ctx context.Context, input map[string]interface{}) (map[string]interface{}, error) {
 	uid, err := getUid(ctx)
@@ -47,7 +71,8 @@ func List(ctx context.Context, input map[string]interface{}) (map[string]interfa
 	)
 	currTxnCid, _ = getUserTxnSt().get(uid)
 	//list := make([]map[string]interface{}, 0)
-	m := make(map[string]interface{})
+	m := make(map[string]bool)
+	list := make([]interface{}, 0)
 
 	for currTxnCid != "" {
 		txn, e = getTxn(currTxnCid)
@@ -60,12 +85,23 @@ func List(ctx context.Context, input map[string]interface{}) (map[string]interfa
 		}
 		pid := post["pid"].(string)
 		if _, ok := m[pid]; !ok {
-			m[pid] = post
+			m[pid] = true
+			list = append(list, post)
 		}
 		currTxnCid = txn.Prev
 	}
 
-	return map[string]interface{}{"list": m}, nil
+	/*
+	list := make([]interface{}, len(m))
+	idx := 0
+	for _, val := range m {
+		list[idx] = val
+		idx++
+	}
+	*/
+
+	return map[string]interface{}{"list": list}, nil
+	//return map[string]interface{}{"list": m}, nil
 }
 
 func fetchPost(postCid string) (map[string]interface{}, error) {
@@ -82,8 +118,10 @@ func fetchPost(postCid string) (map[string]interface{}, error) {
 
 	return map[string]interface{} {
 		"pid": post.Pid,
+		"cid": postCid,
 		"uid": post.Uid,
 		"type": post.Type,
+		"title": extractMdTitle(content),
 		"content": content}, nil
 }
 
@@ -121,6 +159,9 @@ func Commit(ctx context.Context, input map[string]interface{}) (map[string]inter
 		return nil, err
 	}
 
+	RemoveDraft(ctx, map[string]interface{}{"pid": pid})
+
+	wicc.Send("cid", txn["cid"].(string))
 	return txn, nil
 }
 
@@ -187,4 +228,22 @@ func getTxn(cid string) (*txnT, error) {
 		return nil, err
 	}
 	return &txn, nil
+}
+
+func extractMdTitle(content string) string {
+    //$matched = preg_match('/# ([^#\n]+)/', $content, $matches);
+    re := regexp.MustCompile(`# ([^#\n]+)\n`)
+    founds := re.FindStringSubmatch(content)
+
+    //fmt.Println(founds)
+    if len(founds) >= 2 {
+        return founds[1]
+    } else {
+		l := len(content)
+		if l > 100 {
+			return content[0:100]
+		} else {
+			return content
+		}
+    }
 }

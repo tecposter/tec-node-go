@@ -17,12 +17,14 @@ const (
 	userRegCmd = "user.reg"
 	userLoginCmd = "user.login"
 	postCreateCmd = "post.create"
+	postEditCmd = "post.edit"
 	postListCmd = "post.list"
 	postFetchCmd = "post.fetch"
 	postCommitCmd = "post.commit"
 	postListDraftCmd = "post.listDraft"
 	postFetchDraftCmd = "post.fetchDraft"
 	postSaveDraftCmd = "post.saveDraft"
+	postRemoveDraftCmd = "post.removeDraft"
 )
 
 type msgT struct {
@@ -92,7 +94,7 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 			m = map[string]interface{} {
 				"cmd": msg.Cmd,
 				"status": "err",
-				"error": err.Error()}
+				"err": err.Error()}
 		}
 
 		b, err := json.Marshal(m)
@@ -125,6 +127,8 @@ func handleMsg(msg msgT) (map[string]interface{}, error) {
 			h = user.Login
 		case postCreateCmd:
 			h = post.Create
+		case postEditCmd:
+			h = post.Edit
 		case postListCmd:
 			h = post.List
 		case postFetchCmd:
@@ -137,6 +141,8 @@ func handleMsg(msg msgT) (map[string]interface{}, error) {
 			h = post.FetchDraft
 		case postSaveDraftCmd:
 			h = post.SaveDraft
+		case postRemoveDraftCmd:
+			h = post.RemoveDraft
 		default:
 			h = nil
 	}
