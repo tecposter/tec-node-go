@@ -25,3 +25,18 @@ func (r *Response) Error(msg string) {
 	r.Status = "error"
 	r.Data["message"] = msg
 }
+
+func (res *Response) Set(key string, val interface{}) {
+	res.Data[key] = val
+}
+
+func (res *Response) Load(d map[string]interface{}) {
+	for k, v := range d {
+		res.Set(k, v)
+	}
+}
+
+func (res *Response) Has(key string) bool {
+	_, ok := res.Data[key]
+	return ok
+}

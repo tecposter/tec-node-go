@@ -18,3 +18,12 @@ func ParseRequest(txt string) (*Request, error) {
 
 		return &req, nil
 }
+
+func (req *Request) ParamStr(key string) string {
+	val, ok := req.Params[key]
+	if !ok {
+		return ""
+	}
+
+	return val.(string)
+}
