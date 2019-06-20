@@ -13,24 +13,30 @@
 * draft.list
 * user.reg
 * user.login
-* user.refresh-token
+* user.logout
+* (deprecate) user.refresh-token
 
 ## Data Schema
 
-* post
-	* pid
+* user
 	* uid
+	* email
+	* username
+	* passhash
+* [uid]post
+	* pid
+	* (d) uid
 	* changed ?
 	* pcid (post commit id): [pid]-[index]
-* postCommit
+* [uid]postCommit
 	* pcid (post commit id)
 	* pid
-	* uid
+	* (d) uid
 	* created
 	* content
-* draft
+* [uid]draft
 	* pid
-	* uid
+	* (d) uid
 	* changed
 	* content
 * [uid]/post
@@ -56,7 +62,7 @@ Request
 ```
 {
 	"cmd": "post.commit",
-	"token": "[token]",
+	"token": "[token]", // deprecate
 	"params: {
 	}
 }
@@ -130,7 +136,6 @@ request
 ```
 {
 	"cmd": "user.login",
-	"token": "",
 	"params": {
 		"email": "zhanjh@126.com",
 		"password": "xxx"
@@ -149,35 +154,25 @@ Success
 {
 	"cmd": "user.login",
 	"status": "ok",
-	"data": {
-		"token": "***"
-	}
 }
 ```
 
-### user.refresh-token
+### user.logout
 
 request
 
 ```
 {
-	"cmd": "user.refresh-token",
-	"token": "***",
+	"cmd": "user.logout",
+	"params": {}
 }
 ```
-
-Error
-
-* Invalid token
 
 Success
 
 ```
 {
-	"cmd": "user.refresh-token",
-	"status": "ok",
-	"data": {
-		"token": "***"
-	}
+	"cmd": "user.logout",
+	"status": "ok"
 }
 ```

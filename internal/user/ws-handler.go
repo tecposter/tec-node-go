@@ -7,7 +7,7 @@ import (
 	//"encoding/binary"
 	"github.com/tecposter/tec-server-go/internal/ws"
 	"github.com/tecposter/tec-server-go/internal/com/uuid"
-	"github.com/tecposter/tec-server-go/internal/com/rand"
+	//"github.com/tecposter/tec-server-go/internal/com/rand"
 )
 
 type WsHandler struct {
@@ -18,7 +18,7 @@ type WsHandler struct {
 const (
 	regCmd = "user.reg"
 	loginCmd = "user.login"
-	refreshTokenCmd = "user.refresh-token"
+	logoutCmd = "user.logout"
 
 	usernameEmptyErr = "Usernaame cannot be empty"
 	usernameTooShortErr = "Username too short - minimum length is 6"
@@ -66,8 +66,8 @@ func (hdl *WsHandler) Handle(res *ws.Response, req *ws.Request) {
 		hdl.reg(res, req)
 	case loginCmd:
 		hdl.login(res, req)
-	case refreshTokenCmd:
-		hdl.refreshToken(res, req)
+	case logoutCmd:
+		hdl.logout(res, req)
 	default:
 		res.Error(cmdNotFoundErr)
 	}
@@ -156,6 +156,7 @@ func (hdl *WsHandler) login(res *ws.Response, req *ws.Request) {
 
 	req.SetUid(uid)
 
+	/* todo
 	token, err := rand.GenerateStr(tokenByteSize)
 	if err != nil {
 		res.Error(err.Error())
@@ -164,8 +165,14 @@ func (hdl *WsHandler) login(res *ws.Response, req *ws.Request) {
 
 	hdl.cache.set("token-" + uid, token)
 	res.Set("token", token)
+	*/
 }
 
+func (hdl *WsHandler) logout(res *ws.Response, req *ws.Request) {
+	req.RemoveUid()
+}
+
+/*
 func (hdl *WsHandler) refreshToken(res *ws.Response, req *ws.Request) {
 	uid := req.GetUid()
 	if uid == "" {
@@ -180,6 +187,7 @@ func (hdl *WsHandler) refreshToken(res *ws.Response, req *ws.Request) {
 	hdl.cache.set("token-" + uid, token)
 	res.Set("token", token)
 }
+*/
 
 /*
 func (hdl *WsHandler) reg(res *ws.Response, req *ws.Request) {

@@ -52,6 +52,6 @@ func (req *Request) GetUid() string {
 	return ""
 }
 
-func (req *Request) RemoveUid(uid string) {
-	req.hdl.remove(uid)
+func (req *Request) RemoveUid() {
+	req.hdl.remove(uidKey)
 }
