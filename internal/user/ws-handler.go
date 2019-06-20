@@ -6,11 +6,13 @@ import (
 	//"encoding/binary"
 	//"encoding/binary"
 	"github.com/tecposter/tec-server-go/internal/ws"
-	"github.com/tecposter/tec-server-go/internal/uuid"
+	"github.com/tecposter/tec-server-go/internal/com/uuid"
+	"github.com/tecposter/tec-server-go/internal/com/rand"
 )
 
 type WsHandler struct {
 	repo *repository
+	cache *cacheStorage
 }
 
 const (
@@ -21,12 +23,21 @@ const (
 	usernameEmptyErr = "Usernaame cannot be empty"
 	usernameTooShortErr = "Username too short - minimum length is 6"
 	usernameExistsErr = "Username already exists"
+
 	passwordTooShortErr = "Password too short - minimum length is 7"
+	passwordNotMatchErr = "Password not match"
+	passwordEmptyErr = "password cannot be empty"
+
 	emailExistsErr = "Email already exists"
 	emailFormatErr = "Error eamil format"
+	emailNotFoundErr = "Email not found"
+	emailEmptyErr = "Email cannot be empty"
 
 	cmdNotFoundErr = "Command not found in user module"
 
+	notLoginErr = "Not Login"
+
+	tokenByteSize = 36
 	lenMin = 7
 )
 
@@ -36,8 +47,10 @@ func NewWsHandler(userDataDir string) (*WsHandler, error) {
 		return nil, err
 	}
 
+	cache := newCacheStorage()
 	wsHandler := &WsHandler{
-		repo: repo}
+		repo: repo,
+		cache: cache}
 
 	return wsHandler, nil
 }
@@ -48,9 +61,13 @@ func (hdl *WsHandler) Close() {
 
 func (hdl *WsHandler) Handle(res *ws.Response, req *ws.Request) {
 	log.Printf("ws.Request: %+v\n", req)
-	switch req.Cmd {
+	switch req.Cmd() {
 	case regCmd:
 		hdl.reg(res, req)
+	case loginCmd:
+		hdl.login(res, req)
+	case refreshTokenCmd:
+		hdl.refreshToken(res, req)
 	default:
 		res.Error(cmdNotFoundErr)
 	}
@@ -107,9 +124,61 @@ func (hdl *WsHandler) reg(res *ws.Response, req *ws.Request) {
 }
 
 func (hdl *WsHandler) login(res *ws.Response, req *ws.Request) {
+	email := req.ParamStr("email")
+	if email == "" {
+		res.Error(emailEmptyErr)
+		return
+	}
+
+	password := req.ParamStr("password")
+	if password == "" {
+		res.Error(passwordEmptyErr)
+		return
+	}
+
+	uid := hdl.repo.fetchUidByEmail(email)
+	if uid == "" {
+		res.Error(emailNotFoundErr + ": " + email)
+		return
+	}
+
+	usr, err := hdl.repo.fetchUser(uid)
+	if err != nil {
+		res.Error(err.Error())
+		return
+	}
+
+
+	if !checkPasswordHash(password, usr.Passhash) {
+		res.Error(passwordNotMatchErr)
+		return
+	}
+
+	req.SetUid(uid)
+
+	token, err := rand.GenerateStr(tokenByteSize)
+	if err != nil {
+		res.Error(err.Error())
+		return
+	}
+
+	hdl.cache.set("token-" + uid, token)
+	res.Set("token", token)
 }
 
 func (hdl *WsHandler) refreshToken(res *ws.Response, req *ws.Request) {
+	uid := req.GetUid()
+	if uid == "" {
+		res.Error(notLoginErr)
+	}
+
+	token, err := rand.GenerateStr(tokenByteSize)
+	if err != nil {
+		res.Error(err.Error())
+		return
+	}
+	hdl.cache.set("token-" + uid, token)
+	res.Set("token", token)
 }
 
 /*

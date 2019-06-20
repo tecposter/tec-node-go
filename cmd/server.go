@@ -7,7 +7,7 @@ import (
 	"strings"
 	"net/http"
 	"github.com/tecposter/tec-server-go/internal/ws"
-	"github.com/tecposter/tec-server-go/internal/iotool"
+	"github.com/tecposter/tec-server-go/internal/com/iotool"
 	"github.com/tecposter/tec-server-go/internal/user"
 )
 
@@ -22,7 +22,7 @@ type application struct {
 }
 
 func (app *application) handleWs(res *ws.Response, req *ws.Request) {
-	switch extractModule(req.Cmd) {
+	switch extractModule(req.Cmd()) {
 	case userModule:
 		app.userWsHdl.Handle(res, req)
 	default:

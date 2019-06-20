@@ -92,11 +92,11 @@ request
 ```
 {
 	"cmd": "user.reg",
-	"token": "", // empty
+	"token": "",
 	"params": {
 		"email": "zhanjh@126.com",
 		"username": "zhanjh",
-		"password": "***",
+		"password": "123456789"
 	}
 }
 ```
@@ -114,7 +114,12 @@ Success
 ```
 {
 	"cmd": "user.reg",
-	"status": "ok"
+	"status": "ok",
+	"data": {
+		"email": "zhanjh@126.com",
+    "uid": "3HrupZrJFPJnhqvhDXDmEb",
+    "username": "zhanjh"
+	}
 }
 ```
 
