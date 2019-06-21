@@ -1,19 +1,10 @@
 package user
 
 import (
-	"log"
-	//"bytes"
-	//"encoding/binary"
-	//"encoding/binary"
+	//"log"
 	"github.com/tecposter/tec-server-go/internal/ws"
 	"github.com/tecposter/tec-server-go/internal/com/uuid"
-	//"github.com/tecposter/tec-server-go/internal/com/rand"
 )
-
-type WsHandler struct {
-	repo *repository
-	cache *cacheStorage
-}
 
 const (
 	regCmd = "user.reg"
@@ -41,6 +32,11 @@ const (
 	lenMin = 7
 )
 
+type WsHandler struct {
+	repo *repository
+	cache *cacheStorage
+}
+
 func NewWsHandler(userDataDir string) (*WsHandler, error) {
 	repo, err := newRepo(userDataDir)
 	if err != nil {
@@ -60,7 +56,7 @@ func (hdl *WsHandler) Close() {
 }
 
 func (hdl *WsHandler) Handle(res *ws.Response, req *ws.Request) {
-	log.Printf("ws.Request: %+v\n", req)
+	//log.Printf("ws.Request: %+v\n", req)
 	switch req.Cmd() {
 	case regCmd:
 		hdl.reg(res, req)

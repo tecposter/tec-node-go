@@ -176,3 +176,32 @@ Success
 	"status": "ok"
 }
 ```
+
+## post
+
+### post.create
+
+request
+
+```
+{
+	"cmd": "post.create",
+	"params": {}
+}
+```
+
+Error
+
+* Not login
+
+Success
+
+```
+{
+	"cmd": "post.create",
+	"status": "ok",
+	"data": {
+		"pid": "***"
+	}
+}
+```

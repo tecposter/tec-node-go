@@ -6,50 +6,75 @@ import (
 	"path"
 	"strings"
 	"net/http"
-	"github.com/tecposter/tec-server-go/internal/ws"
 	"github.com/tecposter/tec-server-go/internal/com/iotool"
+
+	"github.com/tecposter/tec-server-go/internal/ws"
+
 	"github.com/tecposter/tec-server-go/internal/user"
+	"github.com/tecposter/tec-server-go/internal/post"
 )
 
 const (
 	userModule = "user"
+	postModule = "post"
+
+	bindAddrDefault = ":8765"
 
 	dirMode = 0777
+
+	notLoginErr = "Not Login"
+	moduleNotFoundErr = "Module not found"
 )
 
+/*
+ * main
+ */
+
+func main() {
+	dataDir := getDataDir()
+	bindAddr := getBindAddr()
+	log.Printf("data directory: %s, binding addr: %s", dataDir, bindAddr)
+
+	app := getApp(dataDir)
+	defer app.Close()
+
+	http.Handle("/ws", ws.Handler(app.handleMsg))
+	if err := http.ListenAndServe(bindAddr, nil); err != nil {
+		log.Fatal("ListenAndServe: ", err)
+	}
+}
+
+/*
+ * application
+ */
+
 type application struct {
+	postWsHdl *post.WsHandler
 	userWsHdl *user.WsHandler
 }
 
-func (app *application) handleWs(res *ws.Response, req *ws.Request) {
-	switch extractModule(req.Cmd()) {
+func (app *application) handleMsg(res *ws.Response, req *ws.Request) {
+	mdl := extractModule(req.Cmd())
+
+	switch mdl {
 	case userModule:
 		app.userWsHdl.Handle(res, req)
+	case postModule:
+		requireLogin(res, req, app.postWsHdl.Handle)
 	default:
-		res.Error("Module Not Found")
+		res.Error(moduleNotFoundErr + ": " + mdl)
 	}
 }
 
 func (app *application) Close() {
 	app.userWsHdl.Close()
+	app.postWsHdl.Close()
 }
 
-
-func main() {
-	addr := ":8765"
-	dataDir := getDataDir()
-
-	log.Printf("data directory: %s, Serve addr: %s", dataDir, addr)
-
-
-	app := &application{
+func getApp(dataDir string) *application {
+	return &application{
+		postWsHdl: getPostWsHdl(dataDir),
 		userWsHdl: getUserWsHdl(dataDir)}
-	defer app.Close()
-
-	http.Handle("/ws", ws.Handler(app.handleWs))
-	if err := http.ListenAndServe(addr, nil); err != nil {
-		log.Fatal("ListenAndServe: ", err)
-	}
 }
 
 func getUserWsHdl(dataDir string) *user.WsHandler {
@@ -58,6 +83,31 @@ func getUserWsHdl(dataDir string) *user.WsHandler {
 		log.Fatal(err)
 	}
 	return hdl
+}
+
+func getPostWsHdl(dataDir string) *post.WsHandler {
+	hdl, err := post.NewWsHandler(dataDir)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return hdl
+}
+
+/*
+ * local func
+ */
+
+func requireLogin(res *ws.Response, req *ws.Request, callback ws.HandleMsgFunc) {
+	if req.GetUid() == "" {
+		res.Error(notLoginErr)
+		return
+	}
+	callback(res, req)
+}
+
+func getBindAddr() string {
+	bindAddr := flag.String("bind", bindAddrDefault, "Bind Addr")
+	return *bindAddr
 }
 
 func getDataDir() string {

@@ -5,9 +5,9 @@ import (
 	"golang.org/x/net/websocket"
 )
 
-type WsHandleFunc func(*Response, *Request)
+type HandleMsgFunc func(*Response, *Request)
 
-func Handler(callback WsHandleFunc) websocket.Handler {
+func Handler(callback HandleMsgFunc) websocket.Handler {
 	return websocket.Handler(func(conn *websocket.Conn) {
 
 		hdl := newConnHandler(conn)
