@@ -5,7 +5,7 @@ import (
 )
 
 type Request struct {
-	hdl *connHandler
+	conn *Connection
 	data *requestData
 }
 
@@ -15,13 +15,13 @@ type requestData struct {
 	Params map[string]interface{} `json:"params"`
 }
 
-func NewRequest(hdl *connHandler, txt string) (*Request, error) {
+func NewRequest(conn *Connection, txt string) (*Request, error) {
 		var data requestData;
 		if err := json.Unmarshal([]byte(txt), &data); err != nil {
 			return nil, err
 		}
 
-		return &Request{hdl: hdl, data: &data}, nil
+		return &Request{conn: conn, data: &data}, nil
 }
 
 func (req *Request) Cmd() string {
@@ -42,16 +42,16 @@ const (
 )
 
 func (req *Request) SetUid(uid string) {
-	req.hdl.set(uidKey, uid)
+	req.conn.set(uidKey, uid)
 }
 
 func (req *Request) GetUid() string {
-	if v, ok := req.hdl.get(uidKey); ok {
+	if v, ok := req.conn.get(uidKey); ok {
 		return v.(string)
 	}
 	return ""
 }
 
 func (req *Request) RemoveUid() {
-	req.hdl.remove(uidKey)
+	req.conn.remove(uidKey)
 }

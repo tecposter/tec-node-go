@@ -38,7 +38,7 @@ func main() {
 	app := getApp(dataDir)
 	defer app.Close()
 
-	http.Handle("/ws", ws.Handler(app.handleMsg))
+	http.Handle("/ws", ws.Handle(app))
 	if err := http.ListenAndServe(bindAddr, nil); err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
@@ -64,7 +64,7 @@ func (app *application) Close() {
 	app.postWsHdl.Close()
 }
 
-func (app *application) handleMsg(res *ws.Response, req *ws.Request) {
+func (app *application) HandleMsg(res *ws.Response, req *ws.Request) {
 	mdl := extractModule(req.Cmd())
 
 	switch mdl {
@@ -75,6 +75,10 @@ func (app *application) handleMsg(res *ws.Response, req *ws.Request) {
 	default:
 		res.Error(moduleNotFoundErr + ": " + mdl)
 	}
+}
+
+func (app *application) HandleConn(conn *ws.Connection) {
+	// todo
 }
 
 func getUserWsHdl(dataDir string) *user.WsHandler {
