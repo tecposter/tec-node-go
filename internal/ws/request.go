@@ -5,7 +5,7 @@ import (
 )
 
 type Request struct {
-	conn *Connection
+	Conn *Connection
 	data *requestData
 }
 
@@ -21,7 +21,7 @@ func NewRequest(conn *Connection, txt string) (*Request, error) {
 			return nil, err
 		}
 
-		return &Request{conn: conn, data: &data}, nil
+		return &Request{Conn: conn, data: &data}, nil
 }
 
 func (req *Request) Cmd() string {
@@ -42,16 +42,16 @@ const (
 )
 
 func (req *Request) SetUid(uid string) {
-	req.conn.set(uidKey, uid)
+	req.Conn.Set(uidKey, uid)
 }
 
-func (req *Request) GetUid() string {
-	if v, ok := req.conn.get(uidKey); ok {
+func (req *Request) Uid() string {
+	if v, ok := req.Conn.Get(uidKey); ok {
 		return v.(string)
 	}
 	return ""
 }
 
 func (req *Request) RemoveUid() {
-	req.conn.remove(uidKey)
+	req.Conn.Remove(uidKey)
 }

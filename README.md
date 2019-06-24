@@ -27,6 +27,7 @@
 	* pid
 	* (d) uid
 	* changed ?
+	* title
 	* pcid (post commit id): [pid]-[index]
 * [uid]postCommit
 	* pcid (post commit id)
@@ -38,20 +39,12 @@
 	* pid
 	* (d) uid
 	* changed
-	* content
-* [uid]/post
-	* pid
-	* changed
-	* title
-* [uid]/draft
-	* pid
-	* changed
-	* title
+	* cnt
 * [uid]/txn
 	* timestamp (int)
 	* pcid
 * content
-	* type: markdown / text / html
+	* typ: markdown / text / html
 	* body: ""
 
 
@@ -204,4 +197,12 @@ Success
 		"pid": "***"
 	}
 }
+```
+
+## commands
+
+```
+go run cmd/server.go --datadir="/tmp/tec"
+
+go build -o ws-server cmd/server.go
 ```

@@ -49,19 +49,21 @@ func main() {
  */
 
 type application struct {
-	postWsHdl *post.WsHandler
-	userWsHdl *user.WsHandler
+	dataDir string
+	postSvc *post.Service
+	userSvc *user.Service
 }
 
 func getApp(dataDir string) *application {
 	return &application{
-		postWsHdl: getPostWsHdl(dataDir),
-		userWsHdl: getUserWsHdl(dataDir)}
+		dataDir: dataDir,
+		postSvc: getPostSvc(dataDir),
+		userSvc: getUserSvc(dataDir)}
 }
 
 func (app *application) Close() {
-	app.userWsHdl.Close()
-	app.postWsHdl.Close()
+	app.userSvc.Close()
+	app.postSvc.Close()
 }
 
 func (app *application) HandleMsg(res *ws.Response, req *ws.Request) {
@@ -69,28 +71,28 @@ func (app *application) HandleMsg(res *ws.Response, req *ws.Request) {
 
 	switch mdl {
 	case userModule:
-		app.userWsHdl.Handle(res, req)
+		app.userSvc.HandleMsg(res, req)
 	case postModule:
-		requireLogin(res, req, app.postWsHdl.Handle)
+		requireLogin(res, req, app.postSvc.HandleMsg)
 	default:
 		res.Error(moduleNotFoundErr + ": " + mdl)
 	}
 }
 
 func (app *application) HandleConn(conn *ws.Connection) {
-	// todo
+	conn.Set("dataDir", app.dataDir)
 }
 
-func getUserWsHdl(dataDir string) *user.WsHandler {
-	hdl, err := user.NewWsHandler(path.Join(dataDir, "user"))
+func getUserSvc(dataDir string) *user.Service {
+	hdl, err := user.NewService(path.Join(dataDir, "user"))
 	if err != nil {
 		log.Fatal(err)
 	}
 	return hdl
 }
 
-func getPostWsHdl(dataDir string) *post.WsHandler {
-	hdl, err := post.NewWsHandler(dataDir)
+func getPostSvc(dataDir string) *post.Service {
+	hdl, err := post.NewService(dataDir)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -102,7 +104,7 @@ func getPostWsHdl(dataDir string) *post.WsHandler {
  */
 
 func requireLogin(res *ws.Response, req *ws.Request, callback ws.HandleMsgFunc) {
-	if req.GetUid() == "" {
+	if req.Uid() == "" {
 		res.Error(notLoginErr)
 		return
 	}
@@ -120,6 +122,8 @@ func getDataDir() string {
 		log.Fatal(err)
 	}
 	dataDir := flag.String("datadir", path.Join(currDir, "data"), "Data Directory")
+	flag.Parse()
+
 	iotool.MkdirIfNotExist(*dataDir)
 	return *dataDir
 }
