@@ -53,6 +53,17 @@ type application struct {
 	userWsHdl *user.WsHandler
 }
 
+func getApp(dataDir string) *application {
+	return &application{
+		postWsHdl: getPostWsHdl(dataDir),
+		userWsHdl: getUserWsHdl(dataDir)}
+}
+
+func (app *application) Close() {
+	app.userWsHdl.Close()
+	app.postWsHdl.Close()
+}
+
 func (app *application) handleMsg(res *ws.Response, req *ws.Request) {
 	mdl := extractModule(req.Cmd())
 
@@ -64,17 +75,6 @@ func (app *application) handleMsg(res *ws.Response, req *ws.Request) {
 	default:
 		res.Error(moduleNotFoundErr + ": " + mdl)
 	}
-}
-
-func (app *application) Close() {
-	app.userWsHdl.Close()
-	app.postWsHdl.Close()
-}
-
-func getApp(dataDir string) *application {
-	return &application{
-		postWsHdl: getPostWsHdl(dataDir),
-		userWsHdl: getUserWsHdl(dataDir)}
 }
 
 func getUserWsHdl(dataDir string) *user.WsHandler {
