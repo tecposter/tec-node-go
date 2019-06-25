@@ -6,18 +6,23 @@ import (
 	"github.com/tecposter/tec-server-go/internal/ws"
 )
 
+// commands
 const (
 	createCmd = "post.create"
 	editCmd   = "post.edit"
 	fetchCmd  = "post.fetch"
 	commitCmd = "post.commit"
 	listCmd   = "post.list"
+)
 
+// errors
+const (
 	cmdNotFoundErr  = "Command not found in post module"
 	dataDirEmptyErr = "dataDir cannot be empty"
 	uidEmptyErr     = "uid cannot be empty"
 )
 
+// Service in post
 type Service struct {
 	dataDir    string
 	drfRepoCtn *draftRepoCtn
