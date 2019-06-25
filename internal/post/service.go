@@ -2,8 +2,8 @@ package post
 
 import (
 	"errors"
-	"github.com/tecposter/tec-server-go/internal/com/uuid"
-	"github.com/tecposter/tec-server-go/internal/ws"
+	"github.com/tecposter/tec-node-go/internal/com/uuid"
+	"github.com/tecposter/tec-node-go/internal/ws"
 )
 
 // commands

@@ -2,7 +2,7 @@ package user
 
 import (
 	"encoding/json"
-	"github.com/tecposter/tec-server-go/internal/com/store"
+	"github.com/tecposter/tec-node-go/internal/com/store"
 )
 
 const (

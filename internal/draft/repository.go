@@ -1,7 +1,7 @@
 package draft
 
 import (
-	"github.com/tecposter/tec-server-go/internal/com/store"
+	"github.com/tecposter/tec-node-go/internal/com/store"
 	"path"
 )
 

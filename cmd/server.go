@@ -2,16 +2,16 @@ package main
 
 import (
 	"flag"
-	"github.com/tecposter/tec-server-go/internal/com/iotool"
+	"github.com/tecposter/tec-node-go/internal/com/iotool"
 	"log"
 	"net/http"
 	"path"
 	"strings"
 
-	"github.com/tecposter/tec-server-go/internal/ws"
+	"github.com/tecposter/tec-node-go/internal/ws"
 
-	"github.com/tecposter/tec-server-go/internal/post"
-	"github.com/tecposter/tec-server-go/internal/user"
+	"github.com/tecposter/tec-node-go/internal/post"
+	"github.com/tecposter/tec-node-go/internal/user"
 )
 
 const (

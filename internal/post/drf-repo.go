@@ -1,8 +1,8 @@
 package post
 
 import (
-	"github.com/tecposter/tec-server-go/internal/com/iotool"
-	"github.com/tecposter/tec-server-go/internal/draft"
+	"github.com/tecposter/tec-node-go/internal/com/iotool"
+	"github.com/tecposter/tec-node-go/internal/draft"
 	"path"
 	"sync"
 )
