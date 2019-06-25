@@ -6,9 +6,10 @@ import (
 )
 
 const (
-	fetchCmd = "draft.fetch"
-	saveCmd  = "draft.save"
-	listCmd  = "draft.list"
+	fetchCmd  = "draft.fetch"
+	saveCmd   = "draft.save"
+	listCmd   = "draft.list"
+	deleteCmd = "draft.delete"
 )
 
 const (
@@ -46,6 +47,8 @@ func (svc *Service) HandleMsg(res *ws.Response, req *ws.Request) {
 		svc.save(res, req)
 	case listCmd:
 		svc.list(res, req)
+	case deleteCmd:
+		svc.delete(res, req)
 	default:
 		res.Error(cmdNotFoundErr)
 	}
@@ -90,6 +93,32 @@ func (svc *Service) save(res *ws.Response, req *ws.Request) {
 }
 
 func (svc *Service) list(res *ws.Response, req *ws.Request) {
+	repo, err := getRepo(svc, req)
+	if err != nil {
+		res.Error(err.Error())
+		return
+	}
+	list, err := repo.list()
+	if err != nil {
+		res.Error(err.Error())
+		return
+	}
+
+	res.Set("list", list)
+}
+
+func (svc *Service) delete(res *ws.Response, req *ws.Request) {
+	repo, err := getRepo(svc, req)
+	if err != nil {
+		res.Error(err.Error())
+		return
+	}
+
+	err = repo.delete(req.ParamStr("pid"))
+	if err != nil {
+		res.Error(err.Error())
+		return
+	}
 }
 
 // local func

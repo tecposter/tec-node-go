@@ -99,3 +99,30 @@ func (repo *Repository) fetch(pid string) (*draft, error) {
 	}
 	return &d, nil
 }
+
+func (repo *Repository) list() ([]draftItem, error) {
+	var arr []draftItem
+
+	err := repo.db.List(99999).ForEach(func(key, val []byte) error {
+		var d draft
+		err := json.Unmarshal(val, &d)
+		if err != nil {
+			return err
+		}
+		arr = append(arr, draftItem{
+			PID:     d.PID,
+			Changed: d.Changed,
+			Title:   d.Title()})
+
+		return nil
+	})
+
+	return arr, err
+}
+
+func (repo *Repository) delete(pid string) error {
+	if pid == "" {
+		return errPIDEmpty
+	}
+	return repo.db.Delete([]byte(pid))
+}

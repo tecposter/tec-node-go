@@ -65,6 +65,15 @@ func (db *DB) Get(key []byte) ([]byte, error) {
 	return valCopy, err
 }
 
+func (db *DB) List(size int) *Iterator {
+	opts := badger.DefaultIteratorOptions
+	opts.PrefetchSize = size
+
+	return &Iterator{
+		opts: opts,
+		db:   db}
+}
+
 func (db *DB) Has(key []byte) (bool, error) {
 	err := db.inner.View(func(txn *badger.Txn) error {
 		_, err := txn.Get(key)
@@ -86,6 +95,15 @@ func (db *DB) Set(key, val []byte) error {
 	err := db.inner.Update(func(txn *badger.Txn) error {
 		e := badger.NewEntry(key, val)
 		err := txn.SetEntry(e)
+		return err
+	})
+
+	return err
+}
+
+func (db *DB) Delete(key []byte) error {
+	err := db.inner.Update(func(txn *badger.Txn) error {
+		err := txn.Delete(key)
 		return err
 	})
 
