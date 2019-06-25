@@ -5,9 +5,9 @@ import (
 )
 
 type draft struct {
-	Pid string `json:"pid"`
+	Pid     string    `json:"pid"`
 	Changed time.Time `json:"changed"`
-	Cnt content `json:"cnt"`
+	Cnt     content   `json:"cnt"`
 }
 
 type content struct {

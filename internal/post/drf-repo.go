@@ -1,15 +1,15 @@
 package post
 
 import (
-	"sync"
-	"path"
-	"github.com/tecposter/tec-server-go/internal/draft"
 	"github.com/tecposter/tec-server-go/internal/com/iotool"
+	"github.com/tecposter/tec-server-go/internal/draft"
+	"path"
+	"sync"
 )
 
 type draftRepoCtn struct {
 	dataDir string
-	inner sync.Map
+	inner   sync.Map
 }
 
 func NewDrfRepoCtn(dataDir string) *draftRepoCtn {

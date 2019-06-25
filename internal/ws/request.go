@@ -10,18 +10,18 @@ type Request struct {
 }
 
 type requestData struct {
-	Cmd string `json:"cmd"`
-	Token string `json:"token"`
+	Cmd    string                 `json:"cmd"`
+	Token  string                 `json:"token"`
 	Params map[string]interface{} `json:"params"`
 }
 
 func NewRequest(conn *Connection, txt string) (*Request, error) {
-		var data requestData;
-		if err := json.Unmarshal([]byte(txt), &data); err != nil {
-			return nil, err
-		}
+	var data requestData
+	if err := json.Unmarshal([]byte(txt), &data); err != nil {
+		return nil, err
+	}
 
-		return &Request{Conn: conn, data: &data}, nil
+	return &Request{Conn: conn, data: &data}, nil
 }
 
 func (req *Request) Cmd() string {

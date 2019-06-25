@@ -2,24 +2,24 @@ package post
 
 import (
 	"errors"
-	"github.com/tecposter/tec-server-go/internal/ws"
 	"github.com/tecposter/tec-server-go/internal/com/uuid"
+	"github.com/tecposter/tec-server-go/internal/ws"
 )
 
 const (
 	createCmd = "post.create"
-	editCmd = "post.edit"
-	fetchCmd = "post.fetch"
+	editCmd   = "post.edit"
+	fetchCmd  = "post.fetch"
 	commitCmd = "post.commit"
-	listCmd = "post.list"
+	listCmd   = "post.list"
 
-	cmdNotFoundErr = "Command not found in post module"
+	cmdNotFoundErr  = "Command not found in post module"
 	dataDirEmptyErr = "dataDir cannot be empty"
-	uidEmptyErr = "uid cannot be empty"
+	uidEmptyErr     = "uid cannot be empty"
 )
 
 type Service struct {
-	dataDir string
+	dataDir    string
 	drfRepoCtn *draftRepoCtn
 }
 

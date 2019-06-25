@@ -2,16 +2,16 @@ package main
 
 import (
 	"flag"
+	"github.com/tecposter/tec-server-go/internal/com/iotool"
 	"log"
+	"net/http"
 	"path"
 	"strings"
-	"net/http"
-	"github.com/tecposter/tec-server-go/internal/com/iotool"
 
 	"github.com/tecposter/tec-server-go/internal/ws"
 
-	"github.com/tecposter/tec-server-go/internal/user"
 	"github.com/tecposter/tec-server-go/internal/post"
+	"github.com/tecposter/tec-server-go/internal/user"
 )
 
 const (
@@ -22,7 +22,7 @@ const (
 
 	dirMode = 0777
 
-	notLoginErr = "Not Login"
+	notLoginErr       = "Not Login"
 	moduleNotFoundErr = "Module not found"
 )
 

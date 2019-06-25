@@ -1,8 +1,8 @@
 package iotool
 
 import (
-	"os"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 )
 
@@ -20,7 +20,6 @@ func WriteFile(file string, content string) error {
 	if _, err := tmpfile.WriteAt([]byte(content), 0); err != nil {
 		return err
 	}
-
 
 	err = os.Rename(tmpfile.Name(), file)
 	if err != nil {

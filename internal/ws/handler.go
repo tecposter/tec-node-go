@@ -12,7 +12,6 @@ type Handler interface {
 	HandleMsg(*Response, *Request)
 }
 
-
 func Handle(hdl Handler) websocket.Handler {
 	return websocket.Handler(func(innerConn *websocket.Conn) {
 

@@ -5,16 +5,16 @@ import (
 )
 
 type Response struct {
-	Cmd string `json:"cmd"`
-	Status string `json:"status"`
-	Data map[string]interface{} `json:"data"`
+	Cmd    string                 `json:"cmd"`
+	Status string                 `json:"status"`
+	Data   map[string]interface{} `json:"data"`
 }
 
 func NewResponse(cmd string) *Response {
 	return &Response{
 		Status: "ok",
-		Data: make(map[string]interface{}),
-		Cmd: cmd}
+		Data:   make(map[string]interface{}),
+		Cmd:    cmd}
 }
 
 func (r *Response) Marshal() ([]byte, error) {

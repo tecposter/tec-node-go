@@ -1,14 +1,13 @@
 package draft
 
 import (
-	"path"
 	"github.com/tecposter/tec-server-go/internal/com/store"
+	"path"
 )
 
 type Repository struct {
 	db *store.DB
 }
-
 
 func NewRepo(dataDir string, uid string) (*Repository, error) {
 	draftDir := path.Join(dataDir, uid, "draft")

@@ -2,34 +2,34 @@ package user
 
 import (
 	//"log"
-	"github.com/tecposter/tec-server-go/internal/ws"
 	"github.com/tecposter/tec-server-go/internal/com/uuid"
+	"github.com/tecposter/tec-server-go/internal/ws"
 )
 
 const (
-	regCmd = "user.reg"
-	loginCmd = "user.login"
+	regCmd    = "user.reg"
+	loginCmd  = "user.login"
 	logoutCmd = "user.logout"
 
-	usernameEmptyErr = "Usernaame cannot be empty"
+	usernameEmptyErr    = "Usernaame cannot be empty"
 	usernameTooShortErr = "Username too short - minimum length is 6"
-	usernameExistsErr = "Username already exists"
+	usernameExistsErr   = "Username already exists"
 
 	passwordTooShortErr = "Password too short - minimum length is 7"
 	passwordNotMatchErr = "Password not match"
-	passwordEmptyErr = "password cannot be empty"
+	passwordEmptyErr    = "password cannot be empty"
 
-	emailExistsErr = "Email already exists"
-	emailFormatErr = "Error eamil format"
+	emailExistsErr   = "Email already exists"
+	emailFormatErr   = "Error eamil format"
 	emailNotFoundErr = "Email not found"
-	emailEmptyErr = "Email cannot be empty"
+	emailEmptyErr    = "Email cannot be empty"
 
 	cmdNotFoundErr = "Command not found in user module"
 
 	notLoginErr = "Not Login"
 
 	tokenByteSize = 36
-	lenMin = 7
+	lenMin        = 7
 )
 
 type Service struct {
@@ -115,8 +115,8 @@ func (svc *Service) reg(res *ws.Response, req *ws.Request) {
 	}
 
 	res.Load(map[string]interface{}{
-		"uid": uid,
-		"email": email,
+		"uid":      uid,
+		"email":    email,
 		"username": username})
 }
 
@@ -144,7 +144,6 @@ func (svc *Service) login(res *ws.Response, req *ws.Request) {
 		res.Error(err.Error())
 		return
 	}
-
 
 	if !checkPasswordHash(password, usr.Passhash) {
 		res.Error(passwordNotMatchErr)

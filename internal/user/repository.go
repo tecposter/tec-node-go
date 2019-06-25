@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	emailPre = "email-"
+	emailPre    = "email-"
 	usernamePre = "username-"
 )
 
@@ -33,7 +33,7 @@ func (repo *repository) fetchUser(uid string) (*user, error) {
 		return nil, err
 	}
 
-	var u user;
+	var u user
 	err = json.Unmarshal(res, &u)
 	if err != nil {
 		return nil, err
@@ -70,10 +70,11 @@ func (repo *repository) hasUsername(username string) bool {
 
 var pair = store.Pair
 var arr = store.Arr
+
 func (repo *repository) saveUser(uid string, email string, username string, passhash string) error {
-	u := user {
-		Uid: uid,
-		Email: email,
+	u := user{
+		Uid:      uid,
+		Email:    email,
 		Username: username,
 		Passhash: passhash}
 

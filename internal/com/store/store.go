@@ -12,7 +12,7 @@ type Txn struct {
 	inner *badger.Txn
 }
 
-type txnHandler func(*Txn) error;
+type txnHandler func(*Txn) error
 
 func Open(dirs ...string) (*DB, error) {
 	opts := badger.DefaultOptions
@@ -24,7 +24,7 @@ func Open(dirs ...string) (*DB, error) {
 		opts.ValueDir = dirs[0]
 	}
 
-  db, err := badger.Open(opts)
+	db, err := badger.Open(opts)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,7 @@ func (db *DB) Get(key []byte) ([]byte, error) {
 
 	err := db.inner.View(func(txn *badger.Txn) error {
 		item, err := txn.Get(key)
-		if err != nil  {
+		if err != nil {
 			return err
 		}
 
@@ -57,7 +57,7 @@ func (db *DB) Get(key []byte) ([]byte, error) {
 }
 
 func (db *DB) Set(key, val []byte) error {
-	err := db.inner.Update(func (txn *badger.Txn) error {
+	err := db.inner.Update(func(txn *badger.Txn) error {
 		e := badger.NewEntry(key, val)
 		err := txn.SetEntry(e)
 		return err
@@ -67,7 +67,7 @@ func (db *DB) Set(key, val []byte) error {
 }
 
 func (db *DB) MultiSet(arr [][2][]byte) error {
-	return db.inner.Update(func (txn *badger.Txn) error {
+	return db.inner.Update(func(txn *badger.Txn) error {
 		for _, pair := range arr {
 			entry := badger.NewEntry(pair[0], pair[1])
 			err := txn.SetEntry(entry)
@@ -88,9 +88,9 @@ func Arr(arr ...[2][]byte) [][2][]byte {
 }
 
 func (db *DB) Update(hdl txnHandler) error {
-	return db.inner.Update(func (txn *badger.Txn) error {
+	return db.inner.Update(func(txn *badger.Txn) error {
 		return hdl(&Txn{inner: txn})
-	});
+	})
 }
 
 /*

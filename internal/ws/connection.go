@@ -1,13 +1,13 @@
 package ws
 
 import (
-	"sync"
 	"golang.org/x/net/websocket"
+	"sync"
 )
 
 type Connection struct {
 	inner *websocket.Conn
-	bag sync.Map
+	bag   sync.Map
 }
 
 func newCollection(inner *websocket.Conn) *Connection {

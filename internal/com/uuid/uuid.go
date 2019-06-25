@@ -1,8 +1,8 @@
 package uuid
 
 import (
-	google_uuid "github.com/google/uuid"
 	"github.com/btcsuite/btcutil/base58"
+	google_uuid "github.com/google/uuid"
 )
 
 func NewBase58() (string, error) {
