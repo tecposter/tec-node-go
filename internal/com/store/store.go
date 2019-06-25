@@ -1,6 +1,7 @@
 package store
 
 import (
+	"errors"
 	"github.com/dgraph-io/badger"
 )
 
@@ -13,6 +14,11 @@ type Txn struct {
 }
 
 type txnHandler func(*Txn) error
+
+var (
+	// ErrKeyNotFound is returned when key isn't found
+	ErrKeyNotFound = errors.New("Key not found")
+)
 
 func Open(dirs ...string) (*DB, error) {
 	opts := badger.DefaultOptions
@@ -42,6 +48,9 @@ func (db *DB) Get(key []byte) ([]byte, error) {
 	err := db.inner.View(func(txn *badger.Txn) error {
 		item, err := txn.Get(key)
 		if err != nil {
+			if err == badger.ErrKeyNotFound {
+				return ErrKeyNotFound
+			}
 			return err
 		}
 
@@ -54,6 +63,23 @@ func (db *DB) Get(key []byte) ([]byte, error) {
 	})
 
 	return valCopy, err
+}
+
+func (db *DB) Has(key []byte) (bool, error) {
+	err := db.inner.View(func(txn *badger.Txn) error {
+		_, err := txn.Get(key)
+		return err
+	})
+
+	if err == nil {
+		return true, nil
+	}
+
+	if err == badger.ErrKeyNotFound {
+		return false, nil
+	}
+
+	return false, err
 }
 
 func (db *DB) Set(key, val []byte) error {

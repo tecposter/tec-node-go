@@ -5,12 +5,12 @@ import (
 )
 
 type draft struct {
-	Pid     string    `json:"pid"`
+	PID     string    `json:"pid"`
 	Changed time.Time `json:"changed"`
-	Cnt     content   `json:"cnt"`
+	Cont    content   `json:"cont"`
 }
 
 type content struct {
-	Type string `json:"type"`
+	Typ  string `json:"typ"`
 	Body string `json:"body"`
 }

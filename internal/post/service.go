@@ -3,6 +3,7 @@ package post
 import (
 	"errors"
 	"github.com/tecposter/tec-node-go/internal/com/uuid"
+	"github.com/tecposter/tec-node-go/internal/draft"
 	"github.com/tecposter/tec-node-go/internal/ws"
 )
 
@@ -24,8 +25,8 @@ const (
 
 // Service in post
 type Service struct {
-	dataDir    string
-	drfRepoCtn *draftRepoCtn
+	dataDir string
+	drftCtn *draft.Container
 }
 
 func NewService(dataDir string) (*Service, error) {
@@ -33,16 +34,18 @@ func NewService(dataDir string) (*Service, error) {
 		return nil, errors.New(dataDirEmptyErr)
 	}
 
-	drfRepoCtn := newDrfRepoCtn(dataDir)
+	drftCtn := draft.NewCtn(dataDir)
 	svc := &Service{
-		drfRepoCtn: drfRepoCtn}
+		drftCtn: drftCtn}
 
 	return svc, nil
 }
 
+// Close post service
 func (svc *Service) Close() {
 }
 
+// HandleMsg response and request of wosocket message
 func (svc *Service) HandleMsg(res *ws.Response, req *ws.Request) {
 	switch req.Cmd() {
 	case createCmd:
@@ -70,7 +73,7 @@ func (svc *Service) create(res *ws.Response, req *ws.Request) {
 		return
 	}
 
-	drfRepo, err := svc.drfRepoCtn.Repo(uid)
+	drfRepo, err := svc.drftCtn.Repo(uid)
 	if err != nil {
 		res.Error(err.Error())
 		return

@@ -10,17 +10,20 @@ import (
 
 	"github.com/tecposter/tec-node-go/internal/ws"
 
+	"github.com/tecposter/tec-node-go/internal/draft"
 	"github.com/tecposter/tec-node-go/internal/post"
 	"github.com/tecposter/tec-node-go/internal/user"
 )
 
 const (
-	userModule = "user"
-	postModule = "post"
+	userModule  = "user"
+	postModule  = "post"
+	draftModule = "draft"
+)
 
+const (
 	bindAddrDefault = ":8765"
-
-	dirMode = 0777
+	dirMode         = 0777
 
 	notLoginErr       = "Not Login"
 	moduleNotFoundErr = "Module not found"
@@ -49,21 +52,24 @@ func main() {
  */
 
 type application struct {
-	dataDir string
-	postSvc *post.Service
-	userSvc *user.Service
+	dataDir  string
+	postSvc  *post.Service
+	draftSvc *draft.Service
+	userSvc  *user.Service
 }
 
 func getApp(dataDir string) *application {
 	return &application{
-		dataDir: dataDir,
-		postSvc: getPostSvc(dataDir),
-		userSvc: getUserSvc(dataDir)}
+		dataDir:  dataDir,
+		postSvc:  getPostSvc(dataDir),
+		draftSvc: getDraftSvc(dataDir),
+		userSvc:  getUserSvc(dataDir)}
 }
 
 func (app *application) Close() {
 	app.userSvc.Close()
 	app.postSvc.Close()
+	app.draftSvc.Close()
 }
 
 func (app *application) HandleMsg(res *ws.Response, req *ws.Request) {
@@ -72,6 +78,8 @@ func (app *application) HandleMsg(res *ws.Response, req *ws.Request) {
 	switch mdl {
 	case userModule:
 		app.userSvc.HandleMsg(res, req)
+	case draftModule:
+		requireLogin(res, req, app.draftSvc.HandleMsg)
 	case postModule:
 		requireLogin(res, req, app.postSvc.HandleMsg)
 	default:
@@ -85,6 +93,14 @@ func (app *application) HandleConn(conn *ws.Connection) {
 
 func getUserSvc(dataDir string) *user.Service {
 	hdl, err := user.NewService(path.Join(dataDir, "user"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	return hdl
+}
+
+func getDraftSvc(dataDir string) *draft.Service {
+	hdl, err := draft.NewService(dataDir)
 	if err != nil {
 		log.Fatal(err)
 	}

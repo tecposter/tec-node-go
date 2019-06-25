@@ -1,8 +1,20 @@
 package draft
 
 import (
+	"encoding/json"
+	"errors"
 	"github.com/tecposter/tec-node-go/internal/com/store"
+	"log"
 	"path"
+	"time"
+)
+
+var (
+	ErrKeyNotFound = errors.New("Key not found")
+)
+
+var (
+	errPIDEmpty = errors.New("PID cannot be empty")
 )
 
 type Repository struct {
@@ -20,6 +32,70 @@ func NewRepo(dataDir string, uid string) (*Repository, error) {
 }
 
 func (repo *Repository) Reg(pid string) error {
-	emptyItem := []byte("{}")
-	return repo.db.Set([]byte(pid), emptyItem)
+	if pid == "" {
+		return errPIDEmpty
+	}
+	d := draft{
+		PID:     pid,
+		Changed: time.Now(),
+		Cont: content{
+			Typ:  "",
+			Body: ""}}
+	bs, err := json.Marshal(d)
+	if err != nil {
+		return err
+	}
+
+	return repo.db.Set([]byte(pid), bs)
+}
+
+func (repo *Repository) save(pid string, typ string, body string) error {
+	if pid == "" {
+		return errPIDEmpty
+	}
+
+	key := []byte(pid)
+	ok, err := repo.db.Has(key)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return ErrKeyNotFound
+	}
+
+	log.Println(pid, typ, body)
+
+	cont := content{
+		Typ:  typ,
+		Body: body}
+	drft := draft{
+		PID:     pid,
+		Changed: time.Now(),
+		Cont:    cont}
+
+	drftData, err := json.Marshal(drft)
+	if err != nil {
+		return err
+	}
+
+	err = repo.db.Set(key, drftData)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (repo *Repository) fetch(pid string) (*draft, error) {
+	res, err := repo.db.Get([]byte(pid))
+	if err != nil {
+		return nil, err
+	}
+
+	var d draft
+	err = json.Unmarshal(res, &d)
+	if err != nil {
+		return nil, err
+	}
+	return &d, nil
 }
