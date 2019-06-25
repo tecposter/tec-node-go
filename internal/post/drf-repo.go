@@ -12,7 +12,7 @@ type draftRepoCtn struct {
 	inner   sync.Map
 }
 
-func NewDrfRepoCtn(dataDir string) *draftRepoCtn {
+func newDrfRepoCtn(dataDir string) *draftRepoCtn {
 	return &draftRepoCtn{
 		dataDir: dataDir}
 }

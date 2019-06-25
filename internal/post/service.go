@@ -28,7 +28,7 @@ func NewService(dataDir string) (*Service, error) {
 		return nil, errors.New(dataDirEmptyErr)
 	}
 
-	drfRepoCtn := NewDrfRepoCtn(dataDir)
+	drfRepoCtn := newDrfRepoCtn(dataDir)
 	svc := &Service{
 		drfRepoCtn: drfRepoCtn}
 
