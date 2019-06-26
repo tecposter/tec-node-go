@@ -135,7 +135,7 @@ func (svc *Service) login(res *ws.Response, req *ws.Request) {
 		return
 	}
 
-	uid := svc.repo.fetchUidByEmail(email)
+	uid := svc.repo.fetchUIDByEmail(email)
 	if uid == "" {
 		res.Error(ErrEmailNotFound)
 		return
@@ -152,9 +152,9 @@ func (svc *Service) login(res *ws.Response, req *ws.Request) {
 		return
 	}
 
-	req.SetUid(uid)
+	req.SetUID(uid)
 }
 
 func (svc *Service) logout(res *ws.Response, req *ws.Request) {
-	req.RemoveUid()
+	req.RemoveUID()
 }

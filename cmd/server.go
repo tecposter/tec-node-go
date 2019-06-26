@@ -124,7 +124,7 @@ func getPostSvc(dataDir string) *post.Service {
  */
 
 func requireLogin(res *ws.Response, req *ws.Request, callback ws.HandleMsgFunc) {
-	if req.Uid() == "" {
+	if req.UID() == "" {
 		res.Error(ErrNotLogin)
 		return
 	}

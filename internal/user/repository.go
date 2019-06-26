@@ -42,7 +42,7 @@ func (repo *repository) fetchUser(uid string) (*user, error) {
 	return &u, nil
 }
 
-func (repo *repository) fetchUidByEmail(email string) string {
+func (repo *repository) fetchUIDByEmail(email string) string {
 	res, err := repo.db.Get([]byte(emailPre + email))
 	if err != nil {
 		return ""
@@ -52,10 +52,10 @@ func (repo *repository) fetchUidByEmail(email string) string {
 }
 
 func (repo *repository) hasEmail(email string) bool {
-	return repo.fetchUidByEmail(email) != ""
+	return repo.fetchUIDByEmail(email) != ""
 }
 
-func (repo *repository) fetchUidByUsername(username string) string {
+func (repo *repository) fetchUIDByUsername(username string) string {
 	res, err := repo.db.Get([]byte(usernamePre + username))
 	if err != nil {
 		return ""
@@ -65,7 +65,7 @@ func (repo *repository) fetchUidByUsername(username string) string {
 }
 
 func (repo *repository) hasUsername(username string) bool {
-	return repo.fetchUidByUsername(username) != ""
+	return repo.fetchUIDByUsername(username) != ""
 }
 
 var pair = store.Pair
@@ -73,7 +73,7 @@ var arr = store.Arr
 
 func (repo *repository) saveUser(uid string, email string, username string, passhash string) error {
 	u := user{
-		Uid:      uid,
+		UID:      uid,
 		Email:    email,
 		Username: username,
 		Passhash: passhash}

@@ -15,7 +15,7 @@ const (
 const (
 	cmdNotFoundErr  = "Command not found in draft module"
 	dataDirEmptyErr = "dataDir cannot be empty"
-	uidEmptyErr     = "uid cannot be empty"
+	uidEmptyErr     = "UID cannot be empty"
 )
 
 // errors in the draft service
@@ -23,7 +23,6 @@ var (
 	ErrCmdNotFound  = errors.New("Command not found in draft module")
 	ErrDataDirEmpty = errors.New("dataDir cannot be empty")
 	ErrPidNotFound  = errors.New("Pid not found")
-	ErruidEmpty     = errors.New("uid cannot be empty")
 	ErrUIDEmpty     = errors.New("UID cannot be empty")
 )
 
@@ -129,7 +128,7 @@ func (svc *Service) delete(res *ws.Response, req *ws.Request) {
 
 // local func
 func assertUID(req *ws.Request) string {
-	uid := req.Uid()
+	uid := req.UID()
 	if uid == "" {
 		panic(ErrUIDEmpty)
 	}
@@ -137,7 +136,7 @@ func assertUID(req *ws.Request) string {
 }
 
 func getRepo(svc *Service, req *ws.Request) (*Repository, error) {
-	uid := req.Uid()
+	uid := req.UID()
 	if uid == "" {
 		return nil, ErrUIDEmpty
 	}

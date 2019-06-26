@@ -41,17 +41,17 @@ const (
 	uidKey = "uid"
 )
 
-func (req *Request) SetUid(uid string) {
+func (req *Request) SetUID(uid string) {
 	req.Conn.Set(uidKey, uid)
 }
 
-func (req *Request) Uid() string {
+func (req *Request) UID() string {
 	if v, ok := req.Conn.Get(uidKey); ok {
 		return v.(string)
 	}
 	return ""
 }
 
-func (req *Request) RemoveUid() {
+func (req *Request) RemoveUID() {
 	req.Conn.Remove(uidKey)
 }

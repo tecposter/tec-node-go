@@ -20,7 +20,7 @@ const (
 var (
 	ErrCmdNotFound  = errors.New("Command not found in post module")
 	ErrDataDirEmpty = errors.New("dataDir cannot be empty")
-	ErrUidEmpty     = errors.New("uid cannot be empty")
+	ErrUIDEmpty     = errors.New("uid cannot be empty")
 )
 
 // Service in post
@@ -67,9 +67,9 @@ func (svc *Service) HandleMsg(res *ws.Response, req *ws.Request) {
  *
  */
 func (svc *Service) create(res *ws.Response, req *ws.Request) {
-	uid := req.Uid()
+	uid := req.UID()
 	if uid == "" {
-		res.Error(ErrUidEmpty)
+		res.Error(ErrUIDEmpty)
 		return
 	}
 
