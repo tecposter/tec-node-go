@@ -43,6 +43,7 @@ func NewService(dataDir string) (*Service, error) {
 
 // Close post service
 func (svc *Service) Close() {
+	svc.drftCtn.Close()
 }
 
 // HandleMsg response and request of wosocket message

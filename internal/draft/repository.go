@@ -126,3 +126,7 @@ func (repo *Repository) delete(pid string) error {
 	}
 	return repo.db.Delete([]byte(pid))
 }
+
+func (repo *Repository) Close() {
+	repo.db.Close()
+}

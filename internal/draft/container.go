@@ -11,10 +11,20 @@ type Container struct {
 }
 
 var repos sync.Map
+var once sync.Once
 
 func NewCtn(dataDir string) *Container {
 	return &Container{
 		dataDir: dataDir}
+}
+
+func (ctn *Container) Close() {
+	once.Do(func() {
+		repos.Range(func(_, r interface{}) bool {
+			r.(*Repository).Close()
+			return true
+		})
+	})
 }
 
 func (ctn *Container) Repo(uid string) (*Repository, error) {

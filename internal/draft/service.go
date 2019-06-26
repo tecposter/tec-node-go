@@ -42,6 +42,7 @@ func NewService(dataDir string) (*Service, error) {
 }
 
 func (svc *Service) Close() {
+	svc.ctn.Close()
 }
 
 func (svc *Service) HandleMsg(res *ws.Response, req *ws.Request) {
