@@ -10,6 +10,7 @@ const (
 	dirMode = 0755
 )
 
+// WriteFile writes content into file
 func WriteFile(file string, content string) error {
 	tmpfile, err := ioutil.TempFile("", "tec-go")
 	if err != nil {
@@ -29,6 +30,7 @@ func WriteFile(file string, content string) error {
 	return nil
 }
 
+// GetFileContent gets content from file
 func GetFileContent(file string) (string, error) {
 	content, err := ioutil.ReadFile(file)
 	if err != nil {
@@ -38,6 +40,7 @@ func GetFileContent(file string) (string, error) {
 	return string(content), nil
 }
 
+// CurrDir gets directory to current executable
 func CurrDir() (string, error) {
 	ex, err := os.Executable()
 	if err != nil {
@@ -48,6 +51,7 @@ func CurrDir() (string, error) {
 	return currDir, err
 }
 
+// MkdirIfNotExist makes directory if the path not exists
 func MkdirIfNotExist(path string) error {
 	if fileExists(path) {
 		return nil
