@@ -10,6 +10,10 @@ type Response struct {
 	Data   map[string]interface{} `json:"data"`
 }
 
+const (
+	errorStatus = "error"
+)
+
 func NewResponse(cmd string) *Response {
 	return &Response{
 		Status: "ok",
@@ -21,9 +25,9 @@ func (r *Response) Marshal() ([]byte, error) {
 	return json.Marshal(r)
 }
 
-func (r *Response) Error(msg string) {
-	r.Status = "error"
-	r.Data["message"] = msg
+func (r *Response) Error(err error) {
+	r.Status = errorStatus
+	r.Data["message"] = err.Error()
 }
 
 func (res *Response) Set(key string, val interface{}) {

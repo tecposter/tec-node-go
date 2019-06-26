@@ -17,10 +17,10 @@ const (
 )
 
 // errors
-const (
-	cmdNotFoundErr  = "Command not found in post module"
-	dataDirEmptyErr = "dataDir cannot be empty"
-	uidEmptyErr     = "uid cannot be empty"
+var (
+	ErrCmdNotFound  = errors.New("Command not found in post module")
+	ErrDataDirEmpty = errors.New("dataDir cannot be empty")
+	ErrUidEmpty     = errors.New("uid cannot be empty")
 )
 
 // Service in post
@@ -31,7 +31,7 @@ type Service struct {
 
 func NewService(dataDir string) (*Service, error) {
 	if dataDir == "" {
-		return nil, errors.New(dataDirEmptyErr)
+		return nil, ErrDataDirEmpty
 	}
 
 	drftCtn := draft.NewCtn(dataDir)
@@ -59,7 +59,7 @@ func (svc *Service) HandleMsg(res *ws.Response, req *ws.Request) {
 	case listCmd:
 		svc.list(res, req)
 	default:
-		res.Error(cmdNotFoundErr)
+		res.Error(ErrCmdNotFound)
 	}
 }
 
@@ -69,24 +69,24 @@ func (svc *Service) HandleMsg(res *ws.Response, req *ws.Request) {
 func (svc *Service) create(res *ws.Response, req *ws.Request) {
 	uid := req.Uid()
 	if uid == "" {
-		res.Error(uidEmptyErr)
+		res.Error(ErrUidEmpty)
 		return
 	}
 
 	drfRepo, err := svc.drftCtn.Repo(uid)
 	if err != nil {
-		res.Error(err.Error())
+		res.Error(err)
 		return
 	}
 
 	pid, err := uuid.NewBase58()
 	if err != nil {
-		res.Error(err.Error())
+		res.Error(err)
 		return
 	}
 	err = drfRepo.Reg(pid)
 	if err != nil {
-		res.Error(err.Error())
+		res.Error(err)
 	} else {
 		res.Set("pid", pid)
 	}

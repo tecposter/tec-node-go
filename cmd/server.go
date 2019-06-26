@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"github.com/tecposter/tec-node-go/internal/com/iotool"
 	"log"
@@ -24,9 +25,12 @@ const (
 const (
 	bindAddrDefault = ":8765"
 	dirMode         = 0777
+)
 
-	notLoginErr       = "Not Login"
-	moduleNotFoundErr = "Module not found"
+// errors
+var (
+	ErrNotLogin       = errors.New("Not Login")
+	ErrModuleNotFound = errors.New("Module not found")
 )
 
 /*
@@ -83,7 +87,7 @@ func (app *application) HandleMsg(res *ws.Response, req *ws.Request) {
 	case postModule:
 		requireLogin(res, req, app.postSvc.HandleMsg)
 	default:
-		res.Error(moduleNotFoundErr + ": " + mdl)
+		res.Error(ErrModuleNotFound)
 	}
 }
 
@@ -121,7 +125,7 @@ func getPostSvc(dataDir string) *post.Service {
 
 func requireLogin(res *ws.Response, req *ws.Request, callback ws.HandleMsgFunc) {
 	if req.Uid() == "" {
-		res.Error(notLoginErr)
+		res.Error(ErrNotLogin)
 		return
 	}
 	callback(res, req)
