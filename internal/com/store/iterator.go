@@ -4,11 +4,13 @@ import (
 	"github.com/dgraph-io/badger"
 )
 
+// Iterator wraps badger.Iterator
 type Iterator struct {
 	opts badger.IteratorOptions
 	db   *DB
 }
 
+// ForEach executes a provided function for each key-value pair
 func (wrap *Iterator) ForEach(call func([]byte, []byte) error) error {
 	return wrap.db.inner.View(func(txn *badger.Txn) error {
 		it := txn.NewIterator(wrap.opts)

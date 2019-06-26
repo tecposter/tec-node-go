@@ -5,10 +5,12 @@ import (
 	"github.com/dgraph-io/badger"
 )
 
+// DB wraps *badger.DB
 type DB struct {
 	inner *badger.DB
 }
 
+// Txn wraps *badger.Txn
 type Txn struct {
 	inner *badger.Txn
 }
@@ -20,6 +22,7 @@ var (
 	ErrKeyNotFound = errors.New("Key not found")
 )
 
+// Open returns a new DB object
 func Open(dirs ...string) (*DB, error) {
 	opts := badger.DefaultOptions
 
@@ -38,10 +41,12 @@ func Open(dirs ...string) (*DB, error) {
 	return &DB{inner: db}, nil
 }
 
+// Close closes a DB
 func (db *DB) Close() {
 	db.inner.Close()
 }
 
+// Get looks for key and returns corresponding item.
 func (db *DB) Get(key []byte) ([]byte, error) {
 	var valCopy []byte
 
@@ -65,15 +70,18 @@ func (db *DB) Get(key []byte) ([]byte, error) {
 	return valCopy, err
 }
 
+// List returns a new iterator todo
 func (db *DB) List(size int) *Iterator {
 	opts := badger.DefaultIteratorOptions
 	opts.PrefetchSize = size
+	opts.PrefetchValues = true
 
 	return &Iterator{
 		opts: opts,
 		db:   db}
 }
 
+// Has checks whether key exists
 func (db *DB) Has(key []byte) (bool, error) {
 	err := db.inner.View(func(txn *badger.Txn) error {
 		_, err := txn.Get(key)
@@ -91,6 +99,7 @@ func (db *DB) Has(key []byte) (bool, error) {
 	return false, err
 }
 
+// Set adds a key-value pair to the database
 func (db *DB) Set(key, val []byte) error {
 	err := db.inner.Update(func(txn *badger.Txn) error {
 		e := badger.NewEntry(key, val)
@@ -101,6 +110,7 @@ func (db *DB) Set(key, val []byte) error {
 	return err
 }
 
+// Delete deletes a key from database
 func (db *DB) Delete(key []byte) error {
 	err := db.inner.Update(func(txn *badger.Txn) error {
 		err := txn.Delete(key)
@@ -110,6 +120,7 @@ func (db *DB) Delete(key []byte) error {
 	return err
 }
 
+// MultiSet adds a list of key-value pairs to the database
 func (db *DB) MultiSet(arr [][2][]byte) error {
 	return db.inner.Update(func(txn *badger.Txn) error {
 		for _, pair := range arr {
@@ -123,14 +134,17 @@ func (db *DB) MultiSet(arr [][2][]byte) error {
 	})
 }
 
+// Pair returns a key-value pair
 func Pair(p1, p2 []byte) [2][]byte {
 	return [2][]byte{p1, p2}
 }
 
+// Arr returns a array of key-value pairs
 func Arr(arr ...[2][]byte) [][2][]byte {
 	return arr
 }
 
+// Update wraps badger.DB.Update todo
 func (db *DB) Update(hdl txnHandler) error {
 	return db.inner.Update(func(txn *badger.Txn) error {
 		return hdl(&Txn{inner: txn})
