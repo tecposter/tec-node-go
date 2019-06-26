@@ -70,15 +70,12 @@ func (db *DB) Get(key []byte) ([]byte, error) {
 	return valCopy, err
 }
 
-// List returns a new iterator todo
-func (db *DB) List(size int) *Iterator {
-	opts := badger.DefaultIteratorOptions
-	opts.PrefetchSize = size
-	opts.PrefetchValues = true
-
-	return &Iterator{
-		opts: opts,
-		db:   db}
+// NewIter returns a new Iter
+func (db *DB) NewIter() *Iter {
+	return &Iter{
+		offset: 0,
+		limit:  0,
+		db:     db}
 }
 
 // Has checks whether key exists

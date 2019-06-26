@@ -103,7 +103,7 @@ func (repo *Repository) fetch(pid string) (*draft, error) {
 func (repo *Repository) list() ([]draftItem, error) {
 	var arr []draftItem
 
-	err := repo.db.List(99999).ForEach(func(key, val []byte) error {
+	err := repo.db.NewIter().ForEach(func(key, val []byte) error {
 		var d draft
 		err := json.Unmarshal(val, &d)
 		if err != nil {
