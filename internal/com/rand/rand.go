@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 )
 
+// GenerateBytes generates random bytes with specific size
 func GenerateBytes(size int) ([]byte, error) {
 	b := make([]byte, size)
 	_, err := rand.Read(b)
@@ -16,6 +17,7 @@ func GenerateBytes(size int) ([]byte, error) {
 	return b, nil
 }
 
+// GenerateStr generates random string with specific byte size
 func GenerateStr(size int) (string, error) {
 	b, err := GenerateBytes(size)
 	if err != nil {
