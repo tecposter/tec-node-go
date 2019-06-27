@@ -3,6 +3,7 @@ package draft
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/tecposter/tec-node-go/internal/com/bin"
 	"github.com/tecposter/tec-node-go/internal/com/dto"
 	"regexp"
 	"time"
@@ -31,7 +32,8 @@ type draftItem struct {
 
 const (
 	idSize   = 16
-	timeSize = 15
+	timeSize = 8
+	//timeSize = 15
 )
 
 func newDrft(id dto.ID, typ string, body string) *draft {
@@ -47,10 +49,14 @@ func (d *draft) Marshal() ([]byte, error) {
 	fmt.Println("Marshal:", d.PID.Bytes())
 
 	id := d.PID.Bytes()
-	changed, err := d.Changed.MarshalBinary()
-	if err != nil {
-		return nil, err
-	}
+	nano := d.Changed.UnixNano()
+	changed := bin.Int64ToBytes(nano)
+	/*
+		changed, err := d.Changed.MarshalBinary()
+		if err != nil {
+			return nil, err
+		}
+	*/
 
 	cont, err := json.Marshal([]string{
 		d.Cont.Typ,
@@ -66,13 +72,11 @@ func (d *draft) Marshal() ([]byte, error) {
 
 func (d *draft) Unmarshal(src []byte) error {
 	id := dto.ID(src[0:idSize])
-	var changed time.Time
-	err := changed.UnmarshalBinary(src[idSize : idSize+timeSize])
-	if err != nil {
-		return err
-	}
+	nsec := bin.BytesToInt64(src[idSize : idSize+timeSize])
+	changed := time.Unix(0, nsec)
+
 	var arr [2]string
-	err = json.Unmarshal(src[idSize+timeSize:], &arr)
+	err := json.Unmarshal(src[idSize+timeSize:], &arr)
 	if err != nil {
 		return err
 	}
