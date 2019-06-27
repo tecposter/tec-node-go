@@ -2,12 +2,12 @@ package ws
 
 import (
 	"golang.org/x/net/websocket"
-	"sync"
 )
 
+// Connection wraps websocket.Conn
 type Connection struct {
 	inner *websocket.Conn
-	bag   sync.Map
+	bag   map[string]interface{}
 }
 
 func newCollection(inner *websocket.Conn) *Connection {
@@ -15,14 +15,18 @@ func newCollection(inner *websocket.Conn) *Connection {
 		inner: inner}
 }
 
+// Set adds a key-value pair to the bag of Connection
 func (conn *Connection) Set(key string, val interface{}) {
-	conn.bag.Store(key, val)
+	conn.bag[key] = val
 }
 
+// Get returns the value stored in the bag for a key
 func (conn *Connection) Get(key string) (interface{}, bool) {
-	return conn.bag.Load(key)
+	val, ok := conn.bag[key]
+	return val, ok
 }
 
-func (conn *Connection) Remove(key string) {
-	conn.bag.Delete(key)
+// Delete deletes the value for a key
+func (conn *Connection) Delete(key string) {
+	delete(conn.bag, key)
 }
