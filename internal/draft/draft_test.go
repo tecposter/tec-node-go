@@ -1,0 +1,37 @@
+package draft
+
+import (
+	//"github.com/tecposter/tec-node-go/internal/com/dto"
+	"encoding/json"
+	"github.com/tecposter/tec-node-go/internal/com/uuid"
+	"testing"
+)
+
+func TestDraft(t *testing.T) {
+	id, err := uuid.NewID()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	drft := newDrft(id, "typ", "body")
+	t.Log(drft.PID.Base58(), drft.Changed, drft.Cont.Typ, drft.Cont.Body)
+
+	drftBytes, err := drft.Marshal()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var ndf draft
+	err = ndf.Unmarshal(drftBytes)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(ndf.PID.Base58(), ndf.Changed, ndf.Cont.Typ, ndf.Cont.Body)
+
+	if ndf.PID.Base64() != drft.PID.Base64() {
+		t.Fatalf("PID expected: %s, received: %s", drft.PID.Base58(), ndf.PID.Base58())
+	}
+
+	byts, err := json.Marshal(ndf)
+	t.Log(string(byts), err)
+}

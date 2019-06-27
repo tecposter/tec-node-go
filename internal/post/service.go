@@ -2,7 +2,6 @@ package post
 
 import (
 	"errors"
-	"github.com/tecposter/tec-node-go/internal/com/uuid"
 	"github.com/tecposter/tec-node-go/internal/draft"
 	"github.com/tecposter/tec-node-go/internal/ws"
 )
@@ -29,6 +28,7 @@ type Service struct {
 	drftCtn *draft.Container
 }
 
+// NewService returns post.Service
 func NewService(dataDir string) (*Service, error) {
 	if dataDir == "" {
 		return nil, ErrDataDirEmpty
@@ -80,12 +80,7 @@ func (svc *Service) create(res *ws.Response, req *ws.Request) {
 		return
 	}
 
-	pid, err := uuid.NewBase58()
-	if err != nil {
-		res.Error(err)
-		return
-	}
-	err = drfRepo.Reg(pid)
+	pid, err := drfRepo.Reg()
 	if err != nil {
 		res.Error(err)
 	} else {

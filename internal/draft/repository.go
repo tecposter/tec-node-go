@@ -1,12 +1,11 @@
 package draft
 
 import (
-	"encoding/json"
 	"errors"
+	"github.com/tecposter/tec-node-go/internal/com/dto"
 	"github.com/tecposter/tec-node-go/internal/com/store"
-	"log"
+	"github.com/tecposter/tec-node-go/internal/com/uuid"
 	"path"
-	"time"
 )
 
 var (
@@ -31,31 +30,28 @@ func NewRepo(dataDir string, uid string) (*Repository, error) {
 	return &Repository{db: db}, nil
 }
 
-func (repo *Repository) Reg(pid string) error {
-	if pid == "" {
-		return errPIDEmpty
-	}
-	d := draft{
-		PID:     pid,
-		Changed: time.Now(),
-		Cont: content{
-			Typ:  "",
-			Body: ""}}
-	bs, err := json.Marshal(d)
+func (repo *Repository) Reg() (string, error) {
+	id, err := uuid.NewID()
 	if err != nil {
-		return err
+		return "", err
+	}
+	drft := newDrft(id, "", "")
+	err = repo.saveDrft(drft)
+	if err != nil {
+		return "", err
 	}
 
-	return repo.db.Set([]byte(pid), bs)
+	return drft.PID.Base58(), nil
 }
 
-func (repo *Repository) save(pid string, typ string, body string) error {
-	if pid == "" {
+func (repo *Repository) save(pidStr string, typ string, body string) error {
+	if pidStr == "" {
 		return errPIDEmpty
 	}
 
-	key := []byte(pid)
-	ok, err := repo.db.Has(key)
+	pid := dto.FromBase58(pidStr)
+	ok, err := repo.db.Has(pid.Bytes())
+
 	if err != nil {
 		return err
 	}
@@ -63,22 +59,17 @@ func (repo *Repository) save(pid string, typ string, body string) error {
 		return ErrKeyNotFound
 	}
 
-	log.Println(pid, typ, body)
+	drft := newDrft(pid, typ, body)
+	return repo.saveDrft(drft)
+}
 
-	cont := content{
-		Typ:  typ,
-		Body: body}
-	drft := draft{
-		PID:     pid,
-		Changed: time.Now(),
-		Cont:    cont}
-
-	drftData, err := json.Marshal(drft)
+func (repo *Repository) saveDrft(drft *draft) error {
+	drftData, err := drft.Marshal()
 	if err != nil {
 		return err
 	}
 
-	err = repo.db.Set(key, drftData)
+	err = repo.db.Set(drft.PID.Bytes(), drftData)
 	if err != nil {
 		return err
 	}
@@ -86,17 +77,20 @@ func (repo *Repository) save(pid string, typ string, body string) error {
 	return nil
 }
 
-func (repo *Repository) fetch(pid string) (*draft, error) {
-	res, err := repo.db.Get([]byte(pid))
+func (repo *Repository) fetch(pidStr string) (*draft, error) {
+	pid := dto.FromBase58(pidStr)
+	res, err := repo.db.Get(pid.Bytes())
 	if err != nil {
 		return nil, err
 	}
 
 	var d draft
-	err = json.Unmarshal(res, &d)
+	err = d.Unmarshal(res)
+	//err = json.Unmarshal(res, &d)
 	if err != nil {
 		return nil, err
 	}
+
 	return &d, nil
 }
 
@@ -105,10 +99,17 @@ func (repo *Repository) list() ([]draftItem, error) {
 
 	err := repo.db.NewIter().ForEach(func(key, val []byte) error {
 		var d draft
-		err := json.Unmarshal(val, &d)
+		err := d.Unmarshal(val)
 		if err != nil {
 			return err
 		}
+
+		/*
+			fmt.Println(d)
+			keyID := dto.ID(key)
+			fmt.Println(keyID.Base58())
+		*/
+
 		arr = append(arr, draftItem{
 			PID:     d.PID,
 			Changed: d.Changed,
@@ -120,11 +121,12 @@ func (repo *Repository) list() ([]draftItem, error) {
 	return arr, err
 }
 
-func (repo *Repository) delete(pid string) error {
-	if pid == "" {
+func (repo *Repository) delete(pidStr string) error {
+	if pidStr == "" {
 		return errPIDEmpty
 	}
-	return repo.db.Delete([]byte(pid))
+	pid := dto.FromBase58(pidStr)
+	return repo.db.Delete(pid.Bytes())
 }
 
 func (repo *Repository) Close() {

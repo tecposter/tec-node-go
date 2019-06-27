@@ -12,7 +12,8 @@ type Connection struct {
 
 func newCollection(inner *websocket.Conn) *Connection {
 	return &Connection{
-		inner: inner}
+		inner: inner,
+		bag:   make(map[string]interface{})}
 }
 
 // Set adds a key-value pair to the bag of Connection
