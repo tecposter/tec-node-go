@@ -52,6 +52,6 @@ func (req *Request) UID() string {
 	return ""
 }
 
-func (req *Request) RemoveUID() {
-	req.Conn.Remove(uidKey)
+func (req *Request) DeleteUID() {
+	req.Conn.Delete(uidKey)
 }

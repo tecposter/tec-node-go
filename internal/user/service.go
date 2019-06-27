@@ -156,5 +156,5 @@ func (svc *Service) login(res *ws.Response, req *ws.Request) {
 }
 
 func (svc *Service) logout(res *ws.Response, req *ws.Request) {
-	req.RemoveUID()
+	req.DeleteUID()
 }
