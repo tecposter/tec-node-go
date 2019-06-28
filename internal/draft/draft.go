@@ -44,8 +44,7 @@ func (d *draft) marshal() ([]byte, error) {
 func (d *draft) marshalPair() ([]byte, []byte, error) {
 	//fmt.Println("marshal:", d.PID.Bytes())
 	id := d.PID.Bytes()
-	nano := d.Changed.UnixNano()
-	changed := bin.Int64ToBytes(nano)
+	changed := bin.TimeToBytes(d.Changed)
 
 	typ := []byte{byte(d.Cont.Typ)}
 	body := []byte(d.Cont.Body)
@@ -62,8 +61,7 @@ func (d *draft) unmarshal(src []byte) error {
 }
 
 func (d *draft) unmarshalPair(id, data []byte) error {
-	nsec := bin.BytesToInt64(data[:timeSize])
-	changed := time.Unix(0, nsec)
+	changed := bin.BytesToTime(data[:timeSize])
 	typ := dto.ContentType(data[timeSize])
 	body := string(data[timeSize+1:])
 
