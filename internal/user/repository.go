@@ -1,7 +1,7 @@
 package user
 
 import (
-	"encoding/json"
+	"github.com/tecposter/tec-node-go/internal/com/dto"
 	"github.com/tecposter/tec-node-go/internal/com/store"
 )
 
@@ -27,63 +27,58 @@ func (repo *repository) Close() {
 	repo.db.Close()
 }
 
-func (repo *repository) fetchUser(uid string) (*user, error) {
-	res, err := repo.db.Get([]byte(uid))
+func (repo *repository) fetchUser(uid dto.ID) (*user, error) {
+	res, err := repo.db.Get(uid)
 	if err != nil {
 		return nil, err
 	}
 
 	var u user
-	err = json.Unmarshal(res, &u)
-	if err != nil {
-		return nil, err
-	}
-
+	err = u.unmarshalPair(uid, res)
 	return &u, nil
 }
 
-func (repo *repository) fetchUIDByEmail(email string) string {
+func (repo *repository) fetchUIDByEmail(email string) dto.ID {
 	res, err := repo.db.Get([]byte(emailPre + email))
 	if err != nil {
-		return ""
+		return nil
 	}
 
-	return string(res)
+	return res
 }
 
 func (repo *repository) hasEmail(email string) bool {
-	return repo.fetchUIDByEmail(email) != ""
+	return repo.fetchUIDByEmail(email) != nil
 }
 
-func (repo *repository) fetchUIDByUsername(username string) string {
+func (repo *repository) fetchUIDByUsername(username string) dto.ID {
 	res, err := repo.db.Get([]byte(usernamePre + username))
 	if err != nil {
-		return ""
+		return nil
 	}
 
-	return string(res)
+	return res
 }
 
 func (repo *repository) hasUsername(username string) bool {
-	return repo.fetchUIDByUsername(username) != ""
+	return repo.fetchUIDByUsername(username) != nil
 }
 
 var pair = store.Pair
 var arr = store.Arr
 
-func (repo *repository) saveUser(uid string, email string, username string, passhash string) error {
+func (repo *repository) saveUser(uid dto.ID, email string, username string, passhash string) error {
 	u := user{
 		UID:      uid,
 		Email:    email,
 		Username: username,
 		Passhash: passhash}
 
-	data, err := json.Marshal(u)
+	uidKey, data, err := u.marshalPair()
 	if err != nil {
 		return err
 	}
 
-	uidKey := []byte(uid)
 	emailKey := []byte(emailPre + email)
 	usernameKey := []byte(usernamePre + username)
 

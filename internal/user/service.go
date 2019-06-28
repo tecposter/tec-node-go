@@ -34,10 +34,12 @@ var (
 	ErrNotLogin         = errors.New("Not Login")
 )
 
+// A Service provides APIs to handle messages
 type Service struct {
 	repo *repository
 }
 
+// NewService returns a Service
 func NewService(userDataDir string) (*Service, error) {
 	repo, err := newRepo(userDataDir)
 	if err != nil {
@@ -50,10 +52,12 @@ func NewService(userDataDir string) (*Service, error) {
 	return svc, nil
 }
 
+// Close closes a Service
 func (svc *Service) Close() {
 	svc.repo.Close()
 }
 
+// HandleMsg handles websocket messages
 func (svc *Service) HandleMsg(res *ws.Response, req *ws.Request) {
 	//log.Printf("ws.Request: %+v\n", req)
 	switch req.Cmd() {
@@ -104,7 +108,7 @@ func (svc *Service) reg(res *ws.Response, req *ws.Request) {
 		return
 	}
 
-	uid, err := uuid.NewBase58()
+	uid, err := uuid.NewID()
 	if err != nil {
 		res.Error(err)
 		return
@@ -136,7 +140,7 @@ func (svc *Service) login(res *ws.Response, req *ws.Request) {
 	}
 
 	uid := svc.repo.fetchUIDByEmail(email)
-	if uid == "" {
+	if uid == nil {
 		res.Error(ErrEmailNotFound)
 		return
 	}

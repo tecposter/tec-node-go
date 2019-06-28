@@ -1,6 +1,7 @@
 package draft
 
 import (
+	"github.com/tecposter/tec-node-go/internal/com/dto"
 	"github.com/tecposter/tec-node-go/internal/com/iotool"
 	"path"
 	"sync"
@@ -31,17 +32,20 @@ func (ctn *Container) Close() {
 }
 
 // Repo returns a Repository object for a uid
-func (ctn *Container) Repo(uid string) (*Repository, error) {
-	if val, ok := repos.Load(uid); ok {
+func (ctn *Container) Repo(uid dto.ID) (*Repository, error) {
+	key := uid.Base58()
+
+	if val, ok := repos.Load(key); ok {
 		return val.(*Repository), nil
 	}
 
-	iotool.MkdirIfNotExist(path.Join(ctn.dataDir, uid))
-	repo, err := NewRepo(ctn.dataDir, uid)
+	uidBase58 := uid.Base58()
+	iotool.MkdirIfNotExist(path.Join(ctn.dataDir, uidBase58))
+	repo, err := NewRepo(ctn.dataDir, uidBase58)
 	if err != nil {
 		return nil, err
 	}
 
-	repos.Store(uid, repo)
+	repos.Store(key, repo)
 	return repo, nil
 }

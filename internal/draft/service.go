@@ -141,9 +141,9 @@ func (svc *Service) delete(res *ws.Response, req *ws.Request) {
 }
 
 // local func
-func assertUID(req *ws.Request) string {
+func assertUID(req *ws.Request) dto.ID {
 	uid := req.UID()
-	if uid == "" {
+	if uid == nil {
 		panic(ErrUIDEmpty)
 	}
 	return uid
@@ -151,7 +151,7 @@ func assertUID(req *ws.Request) string {
 
 func getRepo(svc *Service, req *ws.Request) (*Repository, error) {
 	uid := req.UID()
-	if uid == "" {
+	if uid == nil {
 		return nil, ErrUIDEmpty
 	}
 	repo, err := svc.ctn.Repo(uid)

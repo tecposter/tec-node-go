@@ -69,7 +69,7 @@ func (svc *Service) HandleMsg(res *ws.Response, req *ws.Request) {
  */
 func (svc *Service) create(res *ws.Response, req *ws.Request) {
 	uid := req.UID()
-	if uid == "" {
+	if uid == nil {
 		res.Error(ErrUIDEmpty)
 		return
 	}

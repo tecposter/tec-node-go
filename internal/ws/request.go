@@ -2,6 +2,7 @@ package ws
 
 import (
 	"encoding/json"
+	"github.com/tecposter/tec-node-go/internal/com/dto"
 )
 
 type Request struct {
@@ -41,15 +42,15 @@ const (
 	uidKey = "uid"
 )
 
-func (req *Request) SetUID(uid string) {
+func (req *Request) SetUID(uid dto.ID) {
 	req.Conn.Set(uidKey, uid)
 }
 
-func (req *Request) UID() string {
+func (req *Request) UID() dto.ID {
 	if v, ok := req.Conn.Get(uidKey); ok {
-		return v.(string)
+		return v.(dto.ID)
 	}
-	return ""
+	return nil
 }
 
 func (req *Request) DeleteUID() {
