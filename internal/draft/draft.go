@@ -36,8 +36,13 @@ func newDrft(id dto.ID, typ dto.ContentType, body string) *draft {
 			Body: body}}
 }
 
-func (d *draft) Marshal() ([]byte, error) {
-	//fmt.Println("Marshal:", d.PID.Bytes())
+func (d *draft) marshal() ([]byte, error) {
+	id, data, err := d.marshalPair()
+	return append(id, data...), err
+}
+
+func (d *draft) marshalPair() ([]byte, []byte, error) {
+	//fmt.Println("marshal:", d.PID.Bytes())
 	id := d.PID.Bytes()
 	nano := d.Changed.UnixNano()
 	changed := bin.Int64ToBytes(nano)
@@ -47,15 +52,20 @@ func (d *draft) Marshal() ([]byte, error) {
 	cont := append(typ, body...)
 
 	//fmt.Printf("id: %d, changed: %d, typ: %d\n", len(id), len(changed), d.Cont.Typ)
-	return append(id, append(changed, cont...)...), nil
+	return id, append(changed, cont...), nil
 }
 
-func (d *draft) Unmarshal(src []byte) error {
+func (d *draft) unmarshal(src []byte) error {
 	id := dto.ID(src[0:idSize])
-	nsec := bin.BytesToInt64(src[idSize : idSize+timeSize])
+	data := src[idSize:]
+	return d.unmarshalPair(id, data)
+}
+
+func (d *draft) unmarshalPair(id, data []byte) error {
+	nsec := bin.BytesToInt64(data[:timeSize])
 	changed := time.Unix(0, nsec)
-	typ := dto.ContentType(src[idSize+timeSize])
-	body := string(src[idSize+timeSize+1:])
+	typ := dto.ContentType(data[timeSize])
+	body := string(data[timeSize+1:])
 
 	d.PID = id
 	d.Changed = changed

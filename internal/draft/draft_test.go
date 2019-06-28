@@ -16,13 +16,13 @@ func TestDraft(t *testing.T) {
 	drft := newDrft(id, dto.ParseContentType("markdown"), "body")
 	t.Log(drft.PID.Base58(), drft.Changed, drft.Cont.Typ, drft.Cont.Body)
 
-	drftBytes, err := drft.Marshal()
+	drftBytes, err := drft.marshal()
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	var ndf draft
-	err = ndf.Unmarshal(drftBytes)
+	err = ndf.unmarshal(drftBytes)
 	if err != nil {
 		t.Fatal(err)
 	}

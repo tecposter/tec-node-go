@@ -70,12 +70,12 @@ func (repo *Repository) save(pid dto.ID, typ dto.ContentType, body string) error
 }
 
 func (repo *Repository) saveDrft(drft *draft) error {
-	drftData, err := drft.Marshal()
+	id, data, err := drft.marshalPair()
 	if err != nil {
 		return err
 	}
 
-	err = repo.db.Set(drft.PID.Bytes(), drftData)
+	err = repo.db.Set(id, data)
 	if err != nil {
 		return err
 	}
@@ -91,7 +91,7 @@ func (repo *Repository) fetch(pid dto.ID) (*draft, error) {
 	}
 
 	var d draft
-	err = d.Unmarshal(res)
+	err = d.unmarshalPair(pid.Bytes(), res)
 	//err = json.Unmarshal(res, &d)
 	if err != nil {
 		return nil, err
@@ -105,7 +105,7 @@ func (repo *Repository) list() ([]draftItem, error) {
 
 	err := repo.db.NewIter().ForEach(func(key, val []byte) error {
 		var d draft
-		err := d.Unmarshal(val)
+		err := d.unmarshalPair(key, val)
 		if err != nil {
 			return err
 		}
