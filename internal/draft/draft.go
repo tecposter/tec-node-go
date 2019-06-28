@@ -27,16 +27,6 @@ const (
 	timeSize = 8
 )
 
-/*
-func newDrft(id dto.ID, typ dto.ContentType, body string) *draft {
-	return &draft{
-		PID:     id,
-		Changed: time.Now(),
-		Cont: dto.Content{
-			Typ:  typ,
-			Body: body}}
-}
-*/
 func newDrft(pid dto.ID, cont dto.Content) *draft {
 	return &draft{
 		PID:     pid,

@@ -133,7 +133,7 @@ func (svc *Service) delete(res *ws.Response, req *ws.Request) {
 		res.Error(ErrPidNotFound)
 		return
 	}
-	err = repo.delete(pid)
+	err = repo.Delete(pid)
 	if err != nil {
 		res.Error(err)
 		return

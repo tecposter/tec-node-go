@@ -4,14 +4,14 @@ import (
 	"errors"
 	"github.com/tecposter/tec-node-go/internal/com/dto"
 	"github.com/tecposter/tec-node-go/internal/com/store"
-	"github.com/tecposter/tec-node-go/internal/com/uuid"
 	"path"
 )
 
 // errors
 var (
-	ErrKeyNotFound = errors.New("Key not found")
-	ErrPIDEmpty    = errors.New("PID cannot be empty")
+	ErrKeyNotFound   = errors.New("Key not found")
+	ErrPIDDuplicated = errors.New("PID duplicated")
+	ErrPIDEmpty      = errors.New("PID cannot be empty")
 )
 
 // A Repository wraps *store.DB
@@ -36,20 +36,31 @@ func (repo *Repository) Close() {
 }
 
 // Reg returns PID of a new created draft
-func (repo *Repository) Reg() (dto.ID, error) {
-	id, err := uuid.NewID()
+func (repo *Repository) Reg(pid dto.ID) error {
+	if pid == nil {
+		return ErrPIDEmpty
+	}
+	ok, err := repo.db.Has(pid)
 	if err != nil {
-		return id, err
+		return err
+	}
+	if ok {
+		return ErrPIDDuplicated
 	}
 
 	cont := dto.MakeContent("text", "")
-	drft := newDrft(id, cont)
+	drft := newDrft(pid, cont)
 	err = repo.saveDrft(drft)
 	if err != nil {
-		return id, err
+		return err
 	}
 
-	return drft.PID, nil
+	return nil
+}
+
+// Has checks whether has a pid
+func (repo *Repository) Has(pid dto.ID) (bool, error) {
+	return repo.db.Has(pid)
 }
 
 func (repo *Repository) save(pid dto.ID, typ string, body string) error {
@@ -123,7 +134,8 @@ func (repo *Repository) list() ([]draftItem, error) {
 	return arr, err
 }
 
-func (repo *Repository) delete(pid dto.ID) error {
+// Delete deletes a pid
+func (repo *Repository) Delete(pid dto.ID) error {
 	if pid == nil {
 		return ErrPIDEmpty
 	}

@@ -39,9 +39,8 @@ func (ctn *Container) Repo(uid dto.ID) (*Repository, error) {
 		return val.(*Repository), nil
 	}
 
-	uidBase58 := uid.Base58()
-	iotool.MkdirIfNotExist(path.Join(ctn.dataDir, uidBase58))
-	repo, err := NewRepo(ctn.dataDir, uidBase58)
+	iotool.MkdirIfNotExist(path.Join(ctn.dataDir, key))
+	repo, err := NewRepo(ctn.dataDir, key)
 	if err != nil {
 		return nil, err
 	}
