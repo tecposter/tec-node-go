@@ -9,8 +9,11 @@ import (
 // A ID contains functions to represent data in different formats
 type ID []byte
 
-// FromBase58 returns ID converted from base58 encoding
-func FromBase58(src string) ID {
+// Base58ToID returns ID converted from base58 encoding
+func Base58ToID(src string) ID {
+	if src == "" {
+		return nil
+	}
 	d := base58.Decode(string(src))
 	return ID(d)
 }

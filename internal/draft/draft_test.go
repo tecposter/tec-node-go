@@ -1,8 +1,8 @@
 package draft
 
 import (
-	//"github.com/tecposter/tec-node-go/internal/com/dto"
 	"encoding/json"
+	"github.com/tecposter/tec-node-go/internal/com/dto"
 	"github.com/tecposter/tec-node-go/internal/com/uuid"
 	"testing"
 )
@@ -13,7 +13,7 @@ func TestDraft(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	drft := newDrft(id, "typ", "body")
+	drft := newDrft(id, dto.ParseContentType("markdown"), "body")
 	t.Log(drft.PID.Base58(), drft.Changed, drft.Cont.Typ, drft.Cont.Body)
 
 	drftBytes, err := drft.Marshal()

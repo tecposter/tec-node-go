@@ -2,6 +2,7 @@ package draft
 
 import (
 	"errors"
+	"github.com/tecposter/tec-node-go/internal/com/dto"
 	"github.com/tecposter/tec-node-go/internal/ws"
 )
 
@@ -26,12 +27,12 @@ var (
 	ErrUIDEmpty     = errors.New("UID cannot be empty")
 )
 
-var ()
-
+// A Service provides functions to handle messages from clients
 type Service struct {
 	ctn *Container
 }
 
+// NewService returns a Service
 func NewService(dataDir string) (*Service, error) {
 	if dataDir == "" {
 		return nil, errors.New(dataDirEmptyErr)
@@ -41,10 +42,12 @@ func NewService(dataDir string) (*Service, error) {
 		ctn: NewCtn(dataDir)}, nil
 }
 
+// Close closes a Service
 func (svc *Service) Close() {
 	svc.ctn.Close()
 }
 
+// HandleMsg handles messages from client
 func (svc *Service) HandleMsg(res *ws.Response, req *ws.Request) {
 	switch req.Cmd() {
 	case fetchCmd:
@@ -61,8 +64,8 @@ func (svc *Service) HandleMsg(res *ws.Response, req *ws.Request) {
 }
 
 func (svc *Service) fetch(res *ws.Response, req *ws.Request) {
-	pid := req.ParamStr("pid")
-	if pid == "" {
+	pid := dto.Base58ToID(req.ParamStr("pid"))
+	if pid == nil {
 		res.Error(ErrPidNotFound)
 		return
 	}
@@ -82,8 +85,13 @@ func (svc *Service) fetch(res *ws.Response, req *ws.Request) {
 }
 
 func (svc *Service) save(res *ws.Response, req *ws.Request) {
-	pid := req.ParamStr("pid")
-	typ := req.ParamStr("typ")
+	pid := dto.Base58ToID(req.ParamStr("pid"))
+	if pid == nil {
+		res.Error(ErrPidNotFound)
+		return
+	}
+
+	typ := dto.ParseContentType(req.ParamStr("typ"))
 	body := req.ParamStr("body")
 
 	repo, err := getRepo(svc, req)
@@ -120,7 +128,12 @@ func (svc *Service) delete(res *ws.Response, req *ws.Request) {
 		return
 	}
 
-	err = repo.delete(req.ParamStr("pid"))
+	pid := dto.Base58ToID(req.ParamStr("pid"))
+	if pid == nil {
+		res.Error(ErrPidNotFound)
+		return
+	}
+	err = repo.delete(pid)
 	if err != nil {
 		res.Error(err)
 		return

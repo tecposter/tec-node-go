@@ -8,18 +8,18 @@ import (
 	"path"
 )
 
+// errors
 var (
 	ErrKeyNotFound = errors.New("Key not found")
+	ErrPIDEmpty    = errors.New("PID cannot be empty")
 )
 
-var (
-	errPIDEmpty = errors.New("PID cannot be empty")
-)
-
+// A Repository wraps *store.DB
 type Repository struct {
 	db *store.DB
 }
 
+// NewRepo returns a Repository object
 func NewRepo(dataDir string, uid string) (*Repository, error) {
 	draftDir := path.Join(dataDir, uid, "draft")
 	db, err := store.Open(draftDir)
@@ -30,26 +30,32 @@ func NewRepo(dataDir string, uid string) (*Repository, error) {
 	return &Repository{db: db}, nil
 }
 
-func (repo *Repository) Reg() (string, error) {
-	id, err := uuid.NewID()
-	if err != nil {
-		return "", err
-	}
-	drft := newDrft(id, "", "")
-	err = repo.saveDrft(drft)
-	if err != nil {
-		return "", err
-	}
-
-	return drft.PID.Base58(), nil
+// Close closes Repository
+func (repo *Repository) Close() {
+	repo.db.Close()
 }
 
-func (repo *Repository) save(pidStr string, typ string, body string) error {
-	if pidStr == "" {
-		return errPIDEmpty
+// Reg returns PID of a new created draft
+func (repo *Repository) Reg() (dto.ID, error) {
+	id, err := uuid.NewID()
+	if err != nil {
+		return id, err
+	}
+	drft := newDrft(id, dto.TypText, "")
+	err = repo.saveDrft(drft)
+	if err != nil {
+		return id, err
 	}
 
-	pid := dto.FromBase58(pidStr)
+	return drft.PID, nil
+}
+
+func (repo *Repository) save(pid dto.ID, typ dto.ContentType, body string) error {
+	if pid == nil {
+		return ErrPIDEmpty
+	}
+
+	//pid := dto.FromBase58(pidStr)
 	ok, err := repo.db.Has(pid.Bytes())
 
 	if err != nil {
@@ -77,8 +83,8 @@ func (repo *Repository) saveDrft(drft *draft) error {
 	return nil
 }
 
-func (repo *Repository) fetch(pidStr string) (*draft, error) {
-	pid := dto.FromBase58(pidStr)
+func (repo *Repository) fetch(pid dto.ID) (*draft, error) {
+	//pid := dto.FromBase58(pidStr)
 	res, err := repo.db.Get(pid.Bytes())
 	if err != nil {
 		return nil, err
@@ -104,12 +110,6 @@ func (repo *Repository) list() ([]draftItem, error) {
 			return err
 		}
 
-		/*
-			fmt.Println(d)
-			keyID := dto.ID(key)
-			fmt.Println(keyID.Base58())
-		*/
-
 		arr = append(arr, draftItem{
 			PID:     d.PID,
 			Changed: d.Changed,
@@ -121,14 +121,10 @@ func (repo *Repository) list() ([]draftItem, error) {
 	return arr, err
 }
 
-func (repo *Repository) delete(pidStr string) error {
-	if pidStr == "" {
-		return errPIDEmpty
+func (repo *Repository) delete(pid dto.ID) error {
+	if pid == nil {
+		return ErrPIDEmpty
 	}
-	pid := dto.FromBase58(pidStr)
+	//pid := dto.FromBase58(pidStr)
 	return repo.db.Delete(pid.Bytes())
-}
-
-func (repo *Repository) Close() {
-	repo.db.Close()
 }
