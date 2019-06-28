@@ -6,6 +6,7 @@ import (
 	"sync"
 )
 
+// A Container contains users' repositories
 type Container struct {
 	dataDir string
 }
@@ -13,11 +14,13 @@ type Container struct {
 var repos sync.Map
 var once sync.Once
 
+// NewCtn returns a new Container object
 func NewCtn(dataDir string) *Container {
 	return &Container{
 		dataDir: dataDir}
 }
 
+// Close closes all the repositories in a Container
 func (ctn *Container) Close() {
 	once.Do(func() {
 		repos.Range(func(_, r interface{}) bool {
@@ -27,6 +30,7 @@ func (ctn *Container) Close() {
 	})
 }
 
+// Repo returns a Repository object for a uid
 func (ctn *Container) Repo(uid string) (*Repository, error) {
 	if val, ok := repos.Load(uid); ok {
 		return val.(*Repository), nil
