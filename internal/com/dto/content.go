@@ -45,6 +45,13 @@ type Content struct {
 	Body string      `json:"body"`
 }
 
+// MakeContent returns a Content
+func MakeContent(typ string, body string) Content {
+	return Content{
+		Typ:  ParseContentType(typ),
+		Body: body}
+}
+
 // Title extracts title from Content
 func (c *Content) Title(limit int) string {
 	switch c.Typ {

@@ -13,7 +13,7 @@ func TestDraft(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	drft := newDrft(id, dto.ParseContentType("markdown"), "body")
+	drft := newDrft(id, dto.MakeContent("markdown", "body"))
 	t.Log(drft.PID.Base58(), drft.Changed, drft.Cont.Typ, drft.Cont.Body)
 
 	drftBytes, err := drft.marshal()

@@ -91,7 +91,7 @@ func (svc *Service) save(res *ws.Response, req *ws.Request) {
 		return
 	}
 
-	typ := dto.ParseContentType(req.ParamStr("typ"))
+	typ := req.ParamStr("typ")
 	body := req.ParamStr("body")
 
 	repo, err := getRepo(svc, req)

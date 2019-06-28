@@ -41,7 +41,9 @@ func (repo *Repository) Reg() (dto.ID, error) {
 	if err != nil {
 		return id, err
 	}
-	drft := newDrft(id, dto.TypText, "")
+
+	cont := dto.MakeContent("text", "")
+	drft := newDrft(id, cont)
 	err = repo.saveDrft(drft)
 	if err != nil {
 		return id, err
@@ -50,7 +52,7 @@ func (repo *Repository) Reg() (dto.ID, error) {
 	return drft.PID, nil
 }
 
-func (repo *Repository) save(pid dto.ID, typ dto.ContentType, body string) error {
+func (repo *Repository) save(pid dto.ID, typ string, body string) error {
 	if pid == nil {
 		return ErrPIDEmpty
 	}
@@ -65,7 +67,7 @@ func (repo *Repository) save(pid dto.ID, typ dto.ContentType, body string) error
 		return ErrKeyNotFound
 	}
 
-	drft := newDrft(pid, typ, body)
+	drft := newDrft(pid, dto.MakeContent(typ, body))
 	return repo.saveDrft(drft)
 }
 
