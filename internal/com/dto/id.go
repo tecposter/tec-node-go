@@ -36,10 +36,7 @@ func (id ID) Base64() string {
 // MarshalJSON implements the json.Marshaler interface
 func (id ID) MarshalJSON() ([]byte, error) {
 	jsonVal, err := json.Marshal(id.Base58())
-	if err != nil {
-		return nil, err
-	}
-	return jsonVal, nil
+	return jsonVal, err
 }
 
 // UnmarshalJSON implements the json.UnmarshalJSON interface
