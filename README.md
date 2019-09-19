@@ -199,6 +199,19 @@ Success
 }
 ```
 
+## dependencies
+
+```
+go get -u -v github.com/btcsuite/btcutil/base58
+go get -u -v github.com/dgraph-io/badger
+```
+
+## compile
+
+```
+env GOOS=windows GOARCH=amd64 go build -v -o ws-server.amd64.exe cmd/server.go
+```
+
 ## commands
 
 ```

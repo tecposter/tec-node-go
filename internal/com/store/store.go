@@ -24,7 +24,7 @@ var (
 
 // Open returns a new DB object
 func Open(dirs ...string) (*DB, error) {
-	opts := badger.DefaultOptions
+	opts := badger.DefaultOptions(dirs[0])
 
 	opts.Dir = dirs[0]
 	if len(dirs) >= 2 {
