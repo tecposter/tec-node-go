@@ -22,7 +22,6 @@ const (
 
 const (
 	bindAddrDefault = "127.0.0.1:8765"
-	dirMode         = 0777
 )
 
 // errors

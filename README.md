@@ -11,10 +11,11 @@
 * draft.save
 * draft.fetch
 * draft.list
-* user.reg
-* user.login
-* user.logout
-* (deprecate) user.refresh-token
+* delayed 
+	* user.reg
+	* user.login
+	* user.logout
+	* (deprecate) user.refresh-token
 
 ## Data Schema
 
