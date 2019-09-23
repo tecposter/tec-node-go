@@ -21,7 +21,7 @@ const (
 )
 
 const (
-	bindAddrDefault = ":8765"
+	bindAddrDefault = "127.0.0.1:8765"
 	dirMode         = 0777
 )
 
