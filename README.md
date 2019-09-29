@@ -19,11 +19,23 @@
 
 ## Data Schema
 
-* user
-	* uid
-	* email
-	* username
-	* passhash
+* [uid]
+	* post
+		* id
+		* commitID
+	* commit
+		* id
+		* postID
+		* contentID
+		* created
+	* content
+		* id
+		* content
+	* draft
+		* postID
+		* content
+		* changed
+
 * [uid]post
 	* pid
 	* (d) uid
@@ -31,10 +43,8 @@
 	* title
 	* pcid (post commit id): [pid]-[index]
 * [uid]postCommit
-	* pcid (post commit id)
+	* cid (content id)
 	* pid
-	* (d) uid
-	* created
 	* content
 * [uid]draft
 	* pid
@@ -219,4 +229,12 @@ env GOOS=windows GOARCH=amd64 go build -v -o ws-server.amd64.exe cmd/server.go
 go run cmd/server.go --datadir="/tmp/tec"
 
 go build -o ws-server cmd/server.go
+```
+
+## test
+
+<https://blog.golang.org/cover>
+
+```
+go test ./db/sqlite3 -coverprofile=coverage.out fmt && go tool cover -func=coverage.out && cat coverage.out && rm coverage.out
 ```

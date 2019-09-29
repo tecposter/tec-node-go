@@ -1,0 +1,13 @@
+mode: set
+github.com/tecposter/tec-node-go/db/sqlite3/sqlite3.go:20.40,21.29 1 1
+github.com/tecposter/tec-node-go/db/sqlite3/sqlite3.go:25.2,26.31 2 1
+github.com/tecposter/tec-node-go/db/sqlite3/sqlite3.go:30.2,31.16 2 1
+github.com/tecposter/tec-node-go/db/sqlite3/sqlite3.go:35.2,36.16 2 1
+github.com/tecposter/tec-node-go/db/sqlite3/sqlite3.go:40.2,40.16 1 1
+github.com/tecposter/tec-node-go/db/sqlite3/sqlite3.go:21.29,23.3 1 0
+github.com/tecposter/tec-node-go/db/sqlite3/sqlite3.go:26.31,28.3 1 0
+github.com/tecposter/tec-node-go/db/sqlite3/sqlite3.go:31.16,33.3 1 0
+github.com/tecposter/tec-node-go/db/sqlite3/sqlite3.go:36.16,38.3 1 0
+github.com/tecposter/tec-node-go/db/sqlite3/sqlite3.go:67.36,69.16 2 1
+github.com/tecposter/tec-node-go/db/sqlite3/sqlite3.go:72.2,72.12 1 1
+github.com/tecposter/tec-node-go/db/sqlite3/sqlite3.go:69.16,71.3 1 0
