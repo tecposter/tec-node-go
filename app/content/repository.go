@@ -3,7 +3,7 @@ package content
 import (
 	"crypto/sha256"
 	"database/sql"
-	"github.com/tecposter/tec-node-go/dto"
+	"github.com/tecposter/tec-node-go/lib/dto"
 )
 
 type repository struct {

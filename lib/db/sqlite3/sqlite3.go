@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	_ "github.com/mattn/go-sqlite3" // SQLite3 implementation of SQL
-	"github.com/tecposter/tec-node-go/iotool"
+	"github.com/tecposter/tec-node-go/lib/iotool"
 	"path"
 )
 

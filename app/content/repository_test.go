@@ -2,7 +2,7 @@ package content
 
 import (
 	"bytes"
-	"github.com/tecposter/tec-node-go/db/sqlite3"
+	"github.com/tecposter/tec-node-go/lib/db/sqlite3"
 	"os"
 	"testing"
 )
