@@ -32,7 +32,7 @@
 		* id
 		* content
 	* draft
-		* postID
+		* id
 		* content
 		* changed
 

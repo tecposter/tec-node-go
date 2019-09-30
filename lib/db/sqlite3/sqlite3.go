@@ -26,7 +26,7 @@ create table content (
 	content TEXT
 );
 create table draft (
-	postID BLOB not null primary key,
+	id BLOB not null primary key,
 	content TEXT,
 	changed NUMERIC not null
 );
