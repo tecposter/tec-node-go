@@ -25,3 +25,18 @@ func newContent(id dto.ID, contentType int, content string) *contentDTO {
 		Created: time.Now().UnixNano(),
 		Content: content}
 }
+
+type commitDTO struct {
+	ID        dto.ID `json:"id"`
+	PostID    dto.ID `json:"postID"`
+	ContentID dto.ID `json:"contentID"`
+	Created   int64  `json:"created"`
+}
+
+func newCommit(id dto.ID, postID dto.ID, contentID dto.ID) *commitDTO {
+	return &commitDTO{
+		ID:        id,
+		PostID:    postID,
+		ContentID: contentID,
+		Created:   time.Now().UnixNano()}
+}

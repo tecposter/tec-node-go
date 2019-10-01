@@ -6,7 +6,6 @@ import (
 	"github.com/tecposter/tec-node-go/lib/dto"
 )
 
-var errAffectNoRows = errors.New("Affect No Rows")
 
 type contentRepository struct {
 	db *sql.DB
@@ -25,29 +24,6 @@ func (repo *contentRepository) insert(c *contentDTO) error {
 	_, err = stmt.Exec(c.ID, c.Type, c.Created, c.Content)
 	return err
 }
-
-/*
-func (repo *contentRepository) update(c *content) error {
-	stmt, err := repo.db.Prepare("update content set type = ?, created = ?, content = ? where id = ?")
-	if err != nil {
-		return err
-	}
-	res, err := stmt.Exec(c.Type, c.Created, c.Content, c.ID)
-	if err != nil {
-		return err
-	}
-
-	affected, err := res.RowsAffected()
-	if err != nil {
-		return err
-	}
-
-	if affected == 0 {
-		return errAffectNoRows
-	}
-	return nil
-}
-*/
 
 func (repo *contentRepository) has(id dto.ID) (bool, error) {
 	stmt, err := repo.db.Prepare("select id from content where id = ? limit 1")
