@@ -75,7 +75,7 @@ func TestMockUpdate(t *testing.T) {
 
 		repo := newRepo(db)
 		err := repo.update(d)
-		assert.Equal(t, errAffectNoRows, err)
+		assert.Equal(t, affectNoRowsErr, err)
 	})
 }
 

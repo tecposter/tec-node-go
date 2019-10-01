@@ -5,14 +5,14 @@ import (
 	"time"
 )
 
-type draft struct {
-	ID      dto.ID `json:"pid"`
+type draftDTO struct {
+	ID      dto.ID `json:"id"`
 	Changed int64  `json:"changed"`
 	Content string `json:"content"`
 }
 
-func newDraft(id dto.ID, content string) *draft {
-	return &draft{
+func newDraft(id dto.ID, content string) *draftDTO {
+	return &draftDTO{
 		ID:      id,
 		Changed: time.Now().UnixNano(),
 		Content: content}
