@@ -2,7 +2,6 @@ package post
 
 import (
 	"database/sql"
-	"errors"
 	"github.com/tecposter/tec-node-go/lib/dto"
 )
 
