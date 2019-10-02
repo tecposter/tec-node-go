@@ -8,9 +8,10 @@ import (
 	"testing"
 )
 
-func TestContentRepo(t *testing.T) {
+func TestCommitRepo(t *testing.T) {
 	const dirMode = 0755
-	var dbDir = "./test-db-post-content-dir"
+	var dbDir = "./test-db-post-commit-dir"
+
 	err := os.Mkdir(dbDir, dirMode)
 	assert.Nil(t, err)
 	defer os.RemoveAll(dbDir)
@@ -20,35 +21,36 @@ func TestContentRepo(t *testing.T) {
 	defer db.Close()
 
 	id1 := dto.ID("id1-fdafda")
-	content1 := "content1-some random"
-	type1 := typeMarkdown
-	c1 := newContent(id1, type1, content1)
+	postID1 := dto.ID("post-id1-fadf")
+	contentID1 := dto.ID("content-id1-fadfda")
+	c1 := newCommit(id1, postID1, contentID1)
 
 	t.Run("Should insert successfully", func(t *testing.T) {
-		repo := newContentRepo(db)
+		repo := newCommitRepo(db)
 		err = repo.insert(c1)
 		assert.Nil(t, err)
 	})
 
 	t.Run("Should has specified id", func(t *testing.T) {
-		repo := newContentRepo(db)
+		repo := newCommitRepo(db)
 		has, err := repo.has(c1.ID)
 		assert.Nil(t, err)
 		assert.Equal(t, true, has, "Should has id: [%s]", c1.ID)
 	})
 
 	t.Run("Fetched item should equal with sepcified item", func(t *testing.T) {
-		repo := newContentRepo(db)
+		repo := newCommitRepo(db)
 		fetchedC1, err := repo.fetch(c1.ID)
 		assert.Nil(t, err)
 		assert.Equal(t, c1.Created, fetchedC1.Created, "Created should equal")
-		assert.Equal(t, c1.Type, fetchedC1.Type, "Type should equal")
-		assert.Equal(t, c1.Content, fetchedC1.Content, "Content should equal")
+		assert.Equal(t, c1.PostID, fetchedC1.PostID, "PostID should equal")
+		assert.Equal(t, c1.ContentID, fetchedC1.ContentID, "ContentID should equal")
+		assert.Equal(t, c1.Created, fetchedC1.Created, "Created should equal")
 	})
 
 	t.Run("Should return error when inserting with duplicated id", func(t *testing.T) {
-		c := newContent(id1, typeHTML, "any-ffgdf")
-		repo := newContentRepo(db)
+		c := newCommit(id1, dto.ID("post-id-any"), dto.ID("content-id-any"))
+		repo := newCommitRepo(db)
 		err := repo.insert(c)
 		assert.NotNil(t, err)
 	})

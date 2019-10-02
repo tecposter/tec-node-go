@@ -8,34 +8,34 @@ import (
 	"testing"
 )
 
-func TestMockContentInsert(t *testing.T) {
+func TestMockCommitInsert(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
 	defer db.Close()
 
 	t.Run("Should return error when executing db.Prepare failed", func(t *testing.T) {
-		mock.ExpectPrepare("insert into post").
+		mock.ExpectPrepare("insert into [commit]").
 			WillReturnError(errors.New("some error"))
 
-		repo := newContentRepo(db)
-		err := repo.insert(newContent(dto.ID("id"), typeHTML, "content"))
+		repo := newCommitRepo(db)
+		err := repo.insert(newCommit(dto.ID("id"), dto.ID("post-id-anty"), dto.ID("content-id-any")))
 		assert.NotNil(t, err)
 	})
 }
 
-func TestMockContentHas(t *testing.T) {
+func TestMockCommitHas(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
 	defer db.Close()
 
-	var sqlPattern = "select id from content where id = (.+) limit 1"
+	var sqlPattern = "select id from .commit. where id = (.+) limit 1"
 
 	t.Run("Should return error when executing db.Prepare failed", func(t *testing.T) {
 		expectedErr := errors.New("db.Prepare failed")
 		mock.ExpectPrepare(sqlPattern).
 			WillReturnError(expectedErr)
 
-		repo := newContentRepo(db)
+		repo := newCommitRepo(db)
 		_, err := repo.has(dto.ID("id"))
 		assert.Equal(t, expectedErr, err)
 	})
@@ -48,25 +48,25 @@ func TestMockContentHas(t *testing.T) {
 			WithArgs(id).
 			WillReturnError(expectedErr)
 
-		repo := newContentRepo(db)
+		repo := newCommitRepo(db)
 		_, err := repo.has(id)
 		assert.Equal(t, expectedErr, err)
 	})
 }
 
-func TestMockContentFecth(t *testing.T) {
+func TestMockCommitFecth(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
 	defer db.Close()
 
-	var sqlPattern = "select id, type, created, content from content where id = (.+) limit 1"
+	var sqlPattern = "select id, postID, contentID, created from .commit. where id = (.+) limit 1"
 
 	t.Run("Should return error when executing db.Prepare failed", func(t *testing.T) {
 		expectedErr := errors.New("db.Prepare failed")
 		mock.ExpectPrepare(sqlPattern).
 			WillReturnError(expectedErr)
 
-		repo := newContentRepo(db)
+		repo := newCommitRepo(db)
 		_, err := repo.fetch(dto.ID("id"))
 		assert.Equal(t, expectedErr, err)
 	})
