@@ -41,7 +41,6 @@ func TestContentRepo(t *testing.T) {
 		repo := newContentRepo(db)
 		fetchedC1, err := repo.fetch(c1.ID)
 		assert.Nil(t, err)
-		assert.Equal(t, c1.Created, fetchedC1.Created, "Created should equal")
 		assert.Equal(t, c1.Type, fetchedC1.Type, "Type should equal")
 		assert.Equal(t, c1.Content, fetchedC1.Content, "Content should equal")
 	})

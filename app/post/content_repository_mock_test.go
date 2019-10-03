@@ -59,7 +59,7 @@ func TestMockContentFecth(t *testing.T) {
 	assert.Nil(t, err)
 	defer db.Close()
 
-	var sqlPattern = "select id, type, created, content from content where id = (.+) limit 1"
+	var sqlPattern = "select id, type, content from content where id = (.+) limit 1"
 
 	t.Run("Should return error when executing db.Prepare failed", func(t *testing.T) {
 		expectedErr := errors.New("db.Prepare failed")

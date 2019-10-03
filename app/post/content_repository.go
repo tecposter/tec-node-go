@@ -15,12 +15,12 @@ func newContentRepo(db *sql.DB) *contentRepository {
 }
 
 func (repo *contentRepository) insert(c *contentDTO) error {
-	stmt, err := repo.db.Prepare("insert into content(id, type, created, content) values (?, ?, ?, ?)")
+	stmt, err := repo.db.Prepare("insert into content(id, type, content) values (?, ?, ?)")
 	if err != nil {
 		return err
 	}
 
-	_, err = stmt.Exec(c.ID, c.Type, c.Created, c.Content)
+	_, err = stmt.Exec(c.ID, c.Type, c.Content)
 	return err
 }
 
@@ -40,13 +40,13 @@ func (repo *contentRepository) has(id dto.ID) (bool, error) {
 }
 
 func (repo *contentRepository) fetch(id dto.ID) (*contentDTO, error) {
-	stmt, err := repo.db.Prepare("select id, type, created, content from content where id = ? limit 1")
+	stmt, err := repo.db.Prepare("select id, type, content from content where id = ? limit 1")
 	if err != nil {
 		return nil, err
 	}
 	defer stmt.Close()
 
 	var c contentDTO
-	err = stmt.QueryRow(id).Scan(&c.ID, &c.Type, &c.Created, &c.Content)
+	err = stmt.QueryRow(id).Scan(&c.ID, &c.Type, &c.Content)
 	return &c, err
 }

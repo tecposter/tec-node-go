@@ -24,7 +24,6 @@ create table [commit] (
 create table content (
 	id BLOB not null primary key,
 	type int not null,
-	created NUMERIC not null,
 	content TEXT
 );
 create table draft (
