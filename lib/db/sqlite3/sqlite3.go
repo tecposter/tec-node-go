@@ -13,7 +13,8 @@ var driverName = "sqlite3"
 var sqlStmt = `
 create table post (
 	id BLOB not null primary key,
-	commitID BLOB not null
+	commitID BLOB not null,
+	created NUMERIC not null
 );
 create table [commit] (
 	id BLOB not null primary key,

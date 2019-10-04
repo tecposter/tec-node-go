@@ -23,6 +23,7 @@
 	* post
 		* id
 		* commitID
+		* created
 	* commit
 		* id
 		* postID
@@ -30,6 +31,7 @@
 		* created
 	* content
 		* id
+		* type
 		* content
 	* draft
 		* id

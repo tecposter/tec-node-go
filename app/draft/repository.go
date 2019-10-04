@@ -6,7 +6,7 @@ import (
 	"github.com/tecposter/tec-node-go/lib/dto"
 )
 
-var affectNoRowsErr = errors.New("Affect No Rows")
+var errAffectNoRows = errors.New("Affect No Rows")
 
 type repository struct {
 	db *sql.DB
@@ -44,7 +44,7 @@ func (repo *repository) update(d *draftDTO) error {
 	}
 
 	if affected == 0 {
-		return affectNoRowsErr
+		return errAffectNoRows
 	}
 	return nil
 }
