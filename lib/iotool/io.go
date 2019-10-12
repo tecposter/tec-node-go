@@ -53,7 +53,7 @@ func CurrDir() (string, error) {
 
 // MkdirIfNotExist makes directory if the path not exists
 func MkdirIfNotExist(path string) error {
-	if fileExists(path) {
+	if FileExists(path) {
 		return nil
 	}
 
@@ -65,7 +65,7 @@ func MkdirIfNotExist(path string) error {
 	return nil
 }
 
-func fileExists(file string) bool {
+func FileExists(file string) bool {
 	if _, err := os.Stat(file); err == nil {
 		return true
 	} else if os.IsNotExist(err) {

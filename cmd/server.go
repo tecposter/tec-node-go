@@ -2,28 +2,18 @@ package main
 
 import (
 	"flag"
-	"github.com/tecposter/tec-node-go/lib/iotool"
 	"log"
-	"net/http"
 	"path"
+
+	// "github.com/gorilla/websocket"
+
+	"github.com/tecposter/tec-node-go/app"
+	"github.com/tecposter/tec-node-go/lib/iotool"
 )
 
 const (
 	defaultBindAddr = "127.0.0.1:7890"
 )
-
-func serveHome(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.URL)
-	if r.URL.Path != "/" {
-		http.Error(w, "Not found", http.StatusNotFound)
-		return
-	}
-	if r.Method != "GET" {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-	http.ServeFile(w, r, "static/home.html")
-}
 
 func main() {
 	currDir, err := iotool.CurrDir()
@@ -34,13 +24,11 @@ func main() {
 	dataDir := flag.String("datadir", defaultDataDir, "Data Directory")
 	bindAddr := flag.String("bind", defaultBindAddr, "Bind Addr")
 	flag.Parse()
-
 	log.Printf("data directory: %s, binding addr: %s", *dataDir, *bindAddr)
+	iotool.MkdirIfNotExist(*dataDir)
 
-	http.HandleFunc("/", serveHome)
-
-	err = http.ListenAndServe(*bindAddr, nil)
+	err = app.NewApp(*dataDir, *bindAddr).Run()
 	if err != nil {
-		log.Fatal("ListenAndServe: ", err)
+		log.Fatal("App.Run: ", err)
 	}
 }
