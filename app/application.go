@@ -4,20 +4,18 @@ import (
 	//	"database/sql"
 	"log"
 	"net/http"
+)
 
-	"github.com/gorilla/websocket"
-
-	"github.com/tecposter/tec-node-go/lib/db/sqlite3"
+const (
+	postModule  = "post"
+	draftModule = "draft"
 )
 
 // Application in app
 type Application struct {
-	// db       *sql.DB
 	dataDir  string
 	bindAddr string
 }
-
-var upgrader = websocket.Upgrader{}
 
 // NewApp return Application
 func NewApp(dataDir, bindAddr string) *Application {
@@ -38,46 +36,43 @@ func (app *Application) Run() error {
 
 func (app *Application) handleWS() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		c, err := upgrader.Upgrade(w, r, nil)
+		conn, err := newConn(app.dataDir, w, r)
 		if err != nil {
-			log.Print("upgrade: ", err)
-			return
+			log.Print("newConn: ", err)
 		}
-		defer c.Close()
+		defer conn.close()
+		conn.onErr(func(err error) {
+			log.Print("read: ", err)
+		})
+		conn.run()
+		/*
+			for {
+				mt, message, err := c.ReadMessage()
+				if err != nil {
+					log.Print("read: ", err)
+					continue
+				}
 
-		db, err := sqlite3.Open(app.dataDir)
-		if err != nil {
-			log.Print("sqlite3.Open: ", err)
-			return
-		}
-		defer db.Close()
+				log.Printf("recv: %s", message)
+				req, err := unmarshalWSReq(message)
+				if err != nil {
+					log.Println("unmarshalWSReq: ", err)
+					continue
+				}
 
-		for {
-			mt, message, err := c.ReadMessage()
-			if err != nil {
-				log.Print("read: ", err)
-				continue
+				b, err := req.Marshal()
+				if err != nil {
+					log.Println("r.Marshal: ", err)
+					continue
+				}
+
+				err = c.WriteMessage(mt, b)
+				if err != nil {
+					log.Println("write: ", err)
+					continue
+				}
 			}
-
-			log.Printf("recv: %s", message)
-			r, err := unmarshalWSReq(message)
-			if err != nil {
-				log.Println("unmarshalWSReq: ", err)
-				continue
-			}
-
-			b, err := r.Marshal()
-			if err != nil {
-				log.Println("r.Marshal: ", err)
-				continue
-			}
-
-			err = c.WriteMessage(mt, b)
-			if err != nil {
-				log.Println("write: ", err)
-				continue
-			}
-		}
+		*/
 	}
 }
 
