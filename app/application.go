@@ -6,11 +6,6 @@ import (
 	"net/http"
 )
 
-const (
-	postModule  = "post"
-	draftModule = "draft"
-)
-
 // Application in app
 type Application struct {
 	dataDir  string
@@ -41,38 +36,11 @@ func (app *Application) handleWS() http.HandlerFunc {
 			log.Print("newConn: ", err)
 		}
 		defer conn.close()
+
 		conn.onErr(func(err error) {
-			log.Print("read: ", err)
+			log.Print("conn: ", err)
 		})
 		conn.run()
-		/*
-			for {
-				mt, message, err := c.ReadMessage()
-				if err != nil {
-					log.Print("read: ", err)
-					continue
-				}
-
-				log.Printf("recv: %s", message)
-				req, err := unmarshalWSReq(message)
-				if err != nil {
-					log.Println("unmarshalWSReq: ", err)
-					continue
-				}
-
-				b, err := req.Marshal()
-				if err != nil {
-					log.Println("r.Marshal: ", err)
-					continue
-				}
-
-				err = c.WriteMessage(mt, b)
-				if err != nil {
-					log.Println("write: ", err)
-					continue
-				}
-			}
-		*/
 	}
 }
 

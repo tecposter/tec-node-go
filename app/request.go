@@ -2,13 +2,8 @@ package app
 
 import (
 	"encoding/json"
+	"strings"
 )
-
-// IRequest request interface
-type IRequest interface {
-	CMD() string
-	Param(string) (interface{}, bool)
-}
 
 type requestDTO struct {
 	CMD    string                 `json:"cmd"`
@@ -38,6 +33,15 @@ func (r *wsRequest) Marshal() ([]byte, error) {
 
 func (r *wsRequest) CMD() string {
 	return r.inner.CMD
+}
+
+func (r *wsRequest) Module() string {
+	cmd := r.CMD()
+	dotIndex := strings.Index(cmd, ".")
+	if dotIndex <= 0 {
+		return ""
+	}
+	return cmd[0:dotIndex]
 }
 
 func (r *wsRequest) Param(key string) (interface{}, bool) {

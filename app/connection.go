@@ -2,12 +2,26 @@ package app
 
 import (
 	"database/sql"
+	"errors"
 	"log"
 	"net/http"
 
 	"github.com/gorilla/websocket"
 
+	"github.com/tecposter/tec-node-go/app/draft"
+	"github.com/tecposter/tec-node-go/app/post"
 	"github.com/tecposter/tec-node-go/lib/db/sqlite3"
+	"github.com/tecposter/tec-node-go/lib/ws"
+)
+
+// errors
+var (
+	ErrModuleNotFound = errors.New("Module not found")
+)
+
+const (
+	postModule  = "post"
+	draftModule = "draft"
 )
 
 var upgrader = websocket.Upgrader{}
@@ -15,6 +29,8 @@ var upgrader = websocket.Upgrader{}
 type connection struct {
 	inner     *websocket.Conn
 	db        *sql.DB
+	draftCtrl *draft.Controller
+	postCtrl  *post.Controller
 	handleErr func(error)
 }
 
@@ -30,10 +46,12 @@ func newConn(dataDir string, w http.ResponseWriter, r *http.Request) (*connectio
 	}
 
 	return &connection{
-		inner: inner,
-		db:    db,
+		inner:     inner,
+		db:        db,
+		postCtrl:  post.NewCtrl(db),
+		draftCtrl: draft.NewCtrl(db),
 		handleErr: func(err error) {
-			panic(err)
+			log.Println("default handleErr: ", err)
 		},
 	}, nil
 }
@@ -57,15 +75,22 @@ func (conn *connection) run() {
 			conn.handleErr(err)
 			continue
 		}
-		b, err := req.Marshal()
+
+		res, err := conn.dispatch(req)
 		if err != nil {
-			log.Println("r.Marshal: ", err)
+			conn.handleErr(err)
+			continue
+		}
+
+		b, err := res.Marshal()
+		if err != nil {
+			conn.handleErr(err)
 			continue
 		}
 
 		err = conn.inner.WriteMessage(mt, b)
 		if err != nil {
-			log.Println("write: ", err)
+			conn.handleErr(err)
 			continue
 		}
 	}
@@ -73,4 +98,15 @@ func (conn *connection) run() {
 
 func (conn *connection) onErr(fn func(error)) {
 	conn.handleErr = fn
+}
+
+func (conn *connection) dispatch(req ws.IRequest) (ws.IResponse, error) {
+	switch req.Module() {
+	case draftModule:
+		return conn.draftCtrl.Handle(req)
+	case postModule:
+		return conn.postCtrl.Handle(req)
+	default:
+		return nil, ErrModuleNotFound
+	}
 }
