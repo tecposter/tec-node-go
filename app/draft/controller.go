@@ -16,6 +16,5 @@ func NewCtrl(db *sql.DB) *Controller {
 	}
 }
 
-func (ctrl *Controller) Handle(req ws.IRequest) (ws.IResponse, error) {
-	return req, nil
+func (ctrl *Controller) Handle(res ws.IResponse, req ws.IRequest) {
 }

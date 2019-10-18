@@ -24,6 +24,10 @@ const (
 	draftModule = "draft"
 )
 
+const (
+	cmdUnknown = "cmdUnknown"
+)
+
 var upgrader = websocket.Upgrader{}
 
 type connection struct {
@@ -31,7 +35,7 @@ type connection struct {
 	db        *sql.DB
 	draftCtrl *draft.Controller
 	postCtrl  *post.Controller
-	handleErr func(error)
+	// errHook   func(error)
 }
 
 func newConn(dataDir string, w http.ResponseWriter, r *http.Request) (*connection, error) {
@@ -50,9 +54,6 @@ func newConn(dataDir string, w http.ResponseWriter, r *http.Request) (*connectio
 		db:        db,
 		postCtrl:  post.NewCtrl(db),
 		draftCtrl: draft.NewCtrl(db),
-		handleErr: func(err error) {
-			log.Println("default handleErr: ", err)
-		},
 	}, nil
 }
 
@@ -61,52 +62,108 @@ func (conn *connection) close() {
 	conn.inner.Close()
 }
 
+func (conn *connection) recv() (int, ws.IRequest, error) {
+	mt, message, err := conn.inner.ReadMessage()
+	if err != nil {
+		return mt, nil, err
+	}
+
+	req, err := unmarshalWSReq(message)
+	if err != nil {
+		return mt, nil, err
+	}
+	return mt, req, nil
+}
+
 func (conn *connection) run() {
 	for {
-		mt, message, err := conn.inner.ReadMessage()
+		mt, req, err := conn.recv()
 		if err != nil {
-			conn.handleErr(err)
+			log.Println("conn.recv: ", err)
 			continue
 		}
 
-		log.Printf("recv: %s", message)
-		req, err := unmarshalWSReq(message)
-		if err != nil {
-			conn.handleErr(err)
-			continue
-		}
+		res := newRes(req.CMD())
+		conn.dispatch(res, req)
 
-		res, err := conn.dispatch(req)
+		err = conn.send(mt, res)
 		if err != nil {
-			conn.handleErr(err)
+			log.Println("conn.send: ", err)
 			continue
 		}
+		/*
+			mt, message, err := conn.inner.ReadMessage()
+			if err != nil {
+				conn.handleErr(cmdUnknown, err)
+				continue
+			}
 
-		b, err := res.Marshal()
-		if err != nil {
-			conn.handleErr(err)
-			continue
-		}
+			log.Printf("recv: %s", message)
+			req, err := unmarshalWSReq(message)
+			if err != nil {
+				conn.handleErr(cmdUnknown, err)
+				continue
+			}
+		*/
 
-		err = conn.inner.WriteMessage(mt, b)
-		if err != nil {
-			conn.handleErr(err)
-			continue
-		}
+		/*
+			cmd := res.CMD()
+			res, err := conn.dispatch(req)
+			if err != nil {
+				conn.handleErr(cmd, err)
+				continue
+			}
+
+			b, err := res.Marshal()
+			if err != nil {
+				conn.handleErr(cmd, err)
+				continue
+			}
+
+			err = conn.inner.WriteMessage(mt, b)
+			if err != nil {
+				conn.handleErr(cmd, err)
+				continue
+			}
+		*/
 	}
 }
 
-func (conn *connection) onErr(fn func(error)) {
-	conn.handleErr = fn
+/*
+func (conn *connection) handleErr(cmd string, err error) {
+	res := newRes(cmd)
+	res.SetErr(err)
+}
+*/
+
+func (conn *connection) send(mt int, res ws.IResponse) error {
+	b, err := res.Marshal()
+	if err != nil {
+		return err
+		// log.Println("conn.send -> res.Marshal: ", err)
+	}
+	err = conn.inner.WriteMessage(mt, b)
+	return err
+	/*
+		if err != nil {
+			log.Println("conn.send -> conn.inner.WriteMessage: ", err)
+		}
+	*/
 }
 
-func (conn *connection) dispatch(req ws.IRequest) (ws.IResponse, error) {
+/*
+func (conn *connection) onErr(fn func(error)) {
+	conn.errHook = fn
+}
+*/
+
+func (conn *connection) dispatch(res ws.IResponse, req ws.IRequest) {
 	switch req.Module() {
 	case draftModule:
-		return conn.draftCtrl.Handle(req)
+		conn.draftCtrl.Handle(res, req)
 	case postModule:
-		return conn.postCtrl.Handle(req)
+		conn.postCtrl.Handle(res, req)
 	default:
-		return nil, ErrModuleNotFound
+		res.SetErr(ErrModuleNotFound)
 	}
 }

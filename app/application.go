@@ -37,9 +37,11 @@ func (app *Application) handleWS() http.HandlerFunc {
 		}
 		defer conn.close()
 
-		conn.onErr(func(err error) {
-			log.Print("conn: ", err)
-		})
+		/*
+			conn.onErr(func(err error) {
+				log.Print("conn: ", err)
+			})
+		*/
 		conn.run()
 	}
 }
