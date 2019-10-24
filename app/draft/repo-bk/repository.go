@@ -3,15 +3,10 @@ package draft
 import (
 	"database/sql"
 	"errors"
-	"time"
-
 	"github.com/tecposter/tec-node-go/lib/dto"
 )
 
-var (
-	errPostIDNotExists = errors.New("Post ID not exists")
-	errAffectNoRows    = errors.New("Affect No Rows")
-)
+var errAffectNoRows = errors.New("Affect No Rows")
 
 type repository struct {
 	db *sql.DB
@@ -21,23 +16,24 @@ func newRepo(db *sql.DB) *repository {
 	return &repository{db: db}
 }
 
-func (repo *repository) save(postID dto.ID, content string) error {
-	ok, err := repo.has(postID)
+func (repo *repository) insert(d *draftDTO) error {
+	stmt, err := repo.db.Prepare("insert into draft(id, changed, content) values (?, ?, ?)")
 	if err != nil {
 		return err
 	}
-	if !ok {
-		return errPostIDNotExists
-	}
 
+	// changed := time.Now().UnixNano()
+	_, err = stmt.Exec(d.ID, d.Changed, d.Content)
+	return err
+}
+
+func (repo *repository) update(d *draftDTO) error {
 	stmt, err := repo.db.Prepare("update draft set changed = ?, content = ? where id = ?")
 	if err != nil {
 		return err
 	}
-	defer stmt.Close()
-
-	changed := time.Now().UnixNano()
-	res, err := stmt.Exec(changed, content, postID)
+	// changed := time.Now().UnixNano()
+	res, err := stmt.Exec(d.Changed, d.Content, d.ID)
 	if err != nil {
 		return err
 	}
@@ -66,4 +62,16 @@ func (repo *repository) has(id dto.ID) (bool, error) {
 	}
 	defer rows.Close()
 	return rows.Next(), nil
+}
+
+func (repo *repository) fetch(id dto.ID) (*draftDTO, error) {
+	stmt, err := repo.db.Prepare("select id, changed, content from draft where id = ? limit 1")
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	var d draftDTO
+	err = stmt.QueryRow(id).Scan(&d.ID, &d.Changed, &d.Content)
+	return &d, err
 }
