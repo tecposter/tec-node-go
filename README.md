@@ -90,7 +90,7 @@ Response
 	"cmd": "post.commit",
 	"status": "error",
 	"data": {
-		"message": "[error message]"
+		"error": "[error message]"
 	}
 }
 ```

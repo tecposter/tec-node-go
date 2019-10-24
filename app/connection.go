@@ -140,22 +140,10 @@ func (conn *connection) send(mt int, res ws.IResponse) error {
 	b, err := res.Marshal()
 	if err != nil {
 		return err
-		// log.Println("conn.send -> res.Marshal: ", err)
 	}
 	err = conn.inner.WriteMessage(mt, b)
 	return err
-	/*
-		if err != nil {
-			log.Println("conn.send -> conn.inner.WriteMessage: ", err)
-		}
-	*/
 }
-
-/*
-func (conn *connection) onErr(fn func(error)) {
-	conn.errHook = fn
-}
-*/
 
 func (conn *connection) dispatch(res ws.IResponse, req ws.IRequest) {
 	switch req.Module() {

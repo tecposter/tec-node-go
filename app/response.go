@@ -8,7 +8,6 @@ import (
 type responseDTO struct {
 	CMD    string                 `json:"cmd"`
 	Status string                 `json:"status"`
-	Error  string                 `json:"error"`
 	Data   map[string]interface{} `json:"data"`
 }
 
@@ -31,7 +30,6 @@ func newRes(cmd string) *wsResponse {
 		inner: &responseDTO{
 			CMD:    cmd,
 			Status: errorStatus,
-			Error:  "",
 			Data:   make(map[string]interface{}),
 		},
 		err: nil,
@@ -48,10 +46,9 @@ func newErrRes(err error) *wsResponse {
 func (res *wsResponse) Marshal() ([]byte, error) {
 	if res.err == nil {
 		res.inner.Status = okStatus
-		res.inner.Error = ""
 	} else {
 		res.inner.Status = errorStatus
-		res.inner.Error = res.err.Error()
+		res.Set("error", res.err.Error())
 	}
 	b, err := json.Marshal(res.inner)
 	return b, err
