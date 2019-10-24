@@ -11,5 +11,6 @@ type IRequest interface {
 // IResponse request interface
 type IResponse interface {
 	Marshal() ([]byte, error)
+	Set(string, interface{})
 	SetErr(error)
 }

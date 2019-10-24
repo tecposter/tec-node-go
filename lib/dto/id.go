@@ -9,6 +9,11 @@ import (
 // A ID contains functions to represent data in different formats
 type ID []byte
 
+// EmptyID returns empty ID
+func EmptyID() ID {
+	return ID([]byte{})
+}
+
 // Base58ToID returns ID converted from base58 encoding
 func Base58ToID(src string) ID {
 	if src == "" {
