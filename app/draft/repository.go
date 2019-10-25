@@ -79,3 +79,28 @@ func (repo *repository) fetch(id dto.ID) (*draftDTO, error) {
 	err = stmt.QueryRow(id).Scan(&d.ID, &d.Changed, &d.Content)
 	return &d, err
 }
+
+func (repo *repository) list() ([]draftDTO, error) {
+	var arr []draftDTO
+	stmt, err := repo.db.Prepare("select id, changed, content from draft")
+	if err != nil {
+		return arr, err
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.Query()
+	if err != nil {
+		return arr, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var d draftDTO
+		err = rows.Scan(&d.ID, &d.Changed, &d.Content)
+		if err != nil {
+			return arr, err
+		}
+		arr = append(arr, d)
+	}
+	return arr, nil
+}

@@ -17,3 +17,13 @@ func newDraft(id dto.ID, content string) *draftDTO {
 		Changed: time.Now().UnixNano(),
 		Content: content}
 }
+
+func (d *draftDTO) Title() string {
+	return ""
+}
+
+type draftItemDTO struct {
+	ID      dto.ID `json:"id"`
+	Changed int64  `json:"changed"`
+	Title   string `json:"title"`
+}

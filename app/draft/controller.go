@@ -38,6 +38,8 @@ func (ctrl *Controller) Handle(res ws.IResponse, req ws.IRequest) {
 		ctrl.save(res, req)
 	case cmdFetch:
 		ctrl.fetch(res, req)
+	case cmdList:
+		ctrl.list(res)
 	default:
 		res.SetErr(errCmdNotFound)
 	}
@@ -74,4 +76,13 @@ func (ctrl *Controller) fetch(res ws.IResponse, req ws.IRequest) {
 		return
 	}
 	res.Set("draft", d)
+}
+
+func (ctrl *Controller) list(res ws.IResponse) {
+	list, err := ctrl.serv.list()
+	if err != nil {
+		res.SetErr(err)
+		return
+	}
+	res.Set("drafts", list)
 }
