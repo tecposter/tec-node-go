@@ -67,3 +67,15 @@ func (repo *repository) has(id dto.ID) (bool, error) {
 	defer rows.Close()
 	return rows.Next(), nil
 }
+
+func (repo *repository) fetch(id dto.ID) (*draftDTO, error) {
+	stmt, err := repo.db.Prepare("select id, changed, content from draft where id = ? limit 1")
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	var d draftDTO
+	err = stmt.QueryRow(id).Scan(&d.ID, &d.Changed, &d.Content)
+	return &d, err
+}

@@ -18,3 +18,8 @@ func (serv *service) save(postIDBase58 string, content string) error {
 	postID := dto.Base58ToID(postIDBase58)
 	return serv.repo.save(postID, content)
 }
+
+func (serv *service) fetch(postIDBase58 string) (*draftDTO, error) {
+	postID := dto.Base58ToID(postIDBase58)
+	return serv.repo.fetch(postID)
+}

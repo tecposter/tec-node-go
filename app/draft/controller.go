@@ -36,6 +36,8 @@ func (ctrl *Controller) Handle(res ws.IResponse, req ws.IRequest) {
 	switch req.CMD() {
 	case cmdSave:
 		ctrl.save(res, req)
+	case cmdFetch:
+		ctrl.fetch(res, req)
 	default:
 		res.SetErr(errCmdNotFound)
 	}
@@ -57,4 +59,19 @@ func (ctrl *Controller) save(res ws.IResponse, req ws.IRequest) {
 	if err != nil {
 		res.SetErr(err)
 	}
+}
+
+func (ctrl *Controller) fetch(res ws.IResponse, req ws.IRequest) {
+	postIDBase58, ok := req.Param("postID")
+	if !ok {
+		res.SetErr(errRequirePostID)
+		return
+	}
+
+	d, err := ctrl.serv.fetch(postIDBase58.(string))
+	if err != nil {
+		res.SetErr(err)
+		return
+	}
+	res.Set("draft", d)
 }
