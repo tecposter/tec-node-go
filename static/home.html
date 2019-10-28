@@ -74,12 +74,17 @@ html {
                      width: 100%;
                      overflow: hidden;
                    }
+                   #msg {
+                      height: 128px;
+                        width: 100%;
+                   }
   </style>
 </head>
 <body>
   <div class="example">
     <pre>
 {"cmd": "post.create"}
+{"cmd": "post.commit", "params":{"postID": "5Cdib1WVXnH7ov23n72EMU", "contentType": "md", "content": "1111 2222 333"}}
 {"cmd": "draft.save", "params":{"postID": "5Cdib1WVXnH7ov23n72EMU", "content": "1111 2222 333"}}
 {"cmd": "draft.list"}
 {"cmd": "draft.delete", "params":{"postID": "5Cdib1WVXnH7ov23n72EMU"}}
@@ -89,8 +94,8 @@ html {
   </div>
   <div id="log"></div>
   <form id="form">
+    <textarea id="msg"></textarea>
     <input type="submit" value="Send" />
-    <input type="text" id="msg" size="64"/>
   </form>
 </body>
 </html>

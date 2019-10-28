@@ -1,8 +1,10 @@
 package dto
 
 import (
+	"bytes"
 	"encoding/base64"
 	"encoding/json"
+
 	"github.com/btcsuite/btcutil/base58"
 )
 
@@ -42,6 +44,12 @@ func (id ID) Base64() string {
 func (id ID) MarshalJSON() ([]byte, error) {
 	jsonVal, err := json.Marshal(id.Base58())
 	return jsonVal, err
+}
+
+// Equal reports whether id and b are the same length and contain the same bytes. A nil argument is
+// equivalent to an empty slice.
+func (id ID) Equal(b ID) bool {
+	return bytes.Equal(id, b)
 }
 
 // UnmarshalJSON implements the json.UnmarshalJSON interface
