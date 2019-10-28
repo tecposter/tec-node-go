@@ -240,3 +240,12 @@ go build -o ws-server cmd/server.go
 ```
 go test ./db/sqlite3 -coverprofile=coverage.out fmt && go tool cover -func=coverage.out && cat coverage.out && rm coverage.out
 ```
+
+## examples
+
+```
+{"cmd": "post.create"}
+
+{"cmd": "draft.list"}
+
+```

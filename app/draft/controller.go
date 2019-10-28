@@ -8,9 +8,11 @@ import (
 )
 
 const (
-	cmdSave  = "draft.save"
-	cmdFetch = "draft.fetch"
-	cmdList  = "draft.list"
+	cmdSave   = "draft.save"
+	cmdFetch  = "draft.fetch"
+	cmdList   = "draft.list"
+	cmdDelete = "draft.delete"
+	cmdHas    = "draft.has"
 )
 
 var (
@@ -40,6 +42,10 @@ func (ctrl *Controller) Handle(res ws.IResponse, req ws.IRequest) {
 		ctrl.fetch(res, req)
 	case cmdList:
 		ctrl.list(res)
+	case cmdDelete:
+		ctrl.delete(res, req)
+	case cmdHas:
+		ctrl.has(res, req)
 	default:
 		res.SetErr(errCmdNotFound)
 	}
@@ -85,4 +91,34 @@ func (ctrl *Controller) list(res ws.IResponse) {
 		return
 	}
 	res.Set("drafts", list)
+}
+
+func (ctrl *Controller) delete(res ws.IResponse, req ws.IRequest) {
+	postIDBase58, ok := req.Param("postID")
+	if !ok {
+		res.SetErr(errRequirePostID)
+		return
+	}
+
+	err := ctrl.serv.delete(postIDBase58.(string))
+	if err != nil {
+		res.SetErr(err)
+		return
+	}
+}
+
+func (ctrl *Controller) has(res ws.IResponse, req ws.IRequest) {
+	postIDBase58, ok := req.Param("postID")
+	if !ok {
+		res.SetErr(errRequirePostID)
+		return
+	}
+
+	has, err := ctrl.serv.has(postIDBase58.(string))
+	if err != nil {
+		res.SetErr(err)
+		return
+	}
+	res.Set("postID", postIDBase58)
+	res.Set("has", has)
 }

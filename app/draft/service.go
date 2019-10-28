@@ -27,3 +27,13 @@ func (serv *service) fetch(postIDBase58 string) (*draftDTO, error) {
 func (serv *service) list() ([]draftDTO, error) {
 	return serv.repo.list()
 }
+
+func (serv *service) delete(postIDBase58 string) error {
+	postID := dto.Base58ToID(postIDBase58)
+	return serv.repo.delete(postID)
+}
+
+func (serv *service) has(postIDBase58 string) (bool, error) {
+	postID := dto.Base58ToID(postIDBase58)
+	return serv.repo.has(postID)
+}

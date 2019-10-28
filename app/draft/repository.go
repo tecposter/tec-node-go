@@ -104,3 +104,26 @@ func (repo *repository) list() ([]draftDTO, error) {
 	}
 	return arr, nil
 }
+
+func (repo *repository) delete(postID dto.ID) error {
+	stmt, err := repo.db.Prepare("delete from draft where id = ?")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	res, err := stmt.Exec(postID)
+	if err != nil {
+		return err
+	}
+
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if affected == 0 {
+		return errAffectNoRows
+	}
+	return nil
+}
