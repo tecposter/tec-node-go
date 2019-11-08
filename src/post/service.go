@@ -2,10 +2,12 @@ package post
 
 import (
 	"database/sql"
+	"log"
 	"strings"
 
 	"github.com/tecposter/tec-node-go/lib/dto"
 	"github.com/tecposter/tec-node-go/lib/uuid"
+	"github.com/tecposter/tec-node-go/src/searcher"
 	"github.com/tecposter/tec-node-go/src/ws"
 )
 
@@ -50,7 +52,17 @@ func (s *service) commit(postIDBase58 string, contentType string, content string
 	}
 
 	err = repo.commit(commitID, postID, contentID)
-	return err
+	if err != nil {
+		return err
+	}
+
+	searcher.Index(postID.Base58(), content)
+	return nil
+}
+
+func (s *service) search(query string) {
+	rs := searcher.Search(query)
+	log.Println(rs)
 }
 
 func toContentTypeID(contentType string) int {

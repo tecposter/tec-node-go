@@ -12,6 +12,7 @@ import (
 	"github.com/tecposter/tec-node-go/src/db"
 	"github.com/tecposter/tec-node-go/src/draft"
 	"github.com/tecposter/tec-node-go/src/post"
+	"github.com/tecposter/tec-node-go/src/searcher"
 	"github.com/tecposter/tec-node-go/src/ws"
 )
 
@@ -33,6 +34,9 @@ var (
 
 // Run run http server app
 func Run(jsonFile string) {
+	searcher.Init()
+	defer searcher.Close()
+
 	err := config.LoadFromJSONFile(jsonFile)
 	if err != nil {
 		log.Println("config error: ", err)

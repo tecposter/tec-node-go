@@ -29,6 +29,8 @@ func Handle(c *ws.Connection) {
 		create(c)
 	case cmdCommit:
 		commit(c)
+	case cmdSearch:
+		search(c)
 	default:
 		c.Res().SetErr(errCmdNotFound)
 	}
@@ -71,4 +73,15 @@ func commit(c *ws.Connection) {
 	if err != nil {
 		res.SetErr(err)
 	}
+}
+
+func search(c *ws.Connection) {
+	query, ok := c.Req().Param("query")
+	if !ok {
+		// res.SetErr(errRequireQuery)
+		// return
+		query = ""
+	}
+
+	newServ(c).search(query.(string))
 }
