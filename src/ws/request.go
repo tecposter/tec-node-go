@@ -1,4 +1,4 @@
-package app
+package ws
 
 import (
 	"encoding/json"
@@ -10,32 +10,36 @@ type requestDTO struct {
 	Params map[string]interface{} `json:"params"`
 }
 
-type wsRequest struct {
+// Request ws request
+type Request struct {
 	inner *requestDTO
 }
 
-func unmarshalWSReq(data []byte) (*wsRequest, error) {
+func unmarshalWSReq(data []byte) (*Request, error) {
 	var inner requestDTO
 	err := json.Unmarshal(data, &inner)
 	if err != nil {
 		return nil, err
 	}
 
-	return &wsRequest{
+	return &Request{
 		inner: &inner,
 	}, nil
 }
 
-func (r *wsRequest) Marshal() ([]byte, error) {
+// Marshal returns JSON encoding
+func (r *Request) Marshal() ([]byte, error) {
 	b, err := json.Marshal(r.inner)
 	return b, err
 }
 
-func (r *wsRequest) CMD() string {
+// CMD returns request command
+func (r *Request) CMD() string {
 	return r.inner.CMD
 }
 
-func (r *wsRequest) Module() string {
+// Module return request module
+func (r *Request) Module() string {
 	cmd := r.CMD()
 	dotIndex := strings.Index(cmd, ".")
 	if dotIndex <= 0 {
@@ -44,7 +48,8 @@ func (r *wsRequest) Module() string {
 	return cmd[0:dotIndex]
 }
 
-func (r *wsRequest) Param(key string) (interface{}, bool) {
+// Param returns request parameter of key
+func (r *Request) Param(key string) (interface{}, bool) {
 	val, ok := r.inner.Params[key]
 	return val, ok
 }

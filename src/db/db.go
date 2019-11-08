@@ -1,11 +1,13 @@
-package sqlite3
+package db
 
 import (
 	"database/sql"
 	"errors"
-	_ "github.com/mattn/go-sqlite3" // SQLite3 implementation of SQL
-	"github.com/tecposter/tec-node-go/lib/iotool"
 	"path"
+
+	"github.com/tecposter/tec-node-go/lib/iotool"
+
+	_ "github.com/mattn/go-sqlite3" // SQLite3 implementation of SQL
 )
 
 var dbFile = "tec.db"
@@ -24,7 +26,7 @@ create table [commit] (
 );
 create table content (
 	id BLOB not null primary key,
-	type int not null,
+	typeID int not null,
 	content TEXT
 );
 create table draft (

@@ -15,8 +15,8 @@ func newRepo(db *sql.DB) *repository {
 	return &repository{db: db}
 }
 
-func (repo *repository) saveContent(cid dto.ID, contentType int, content string) error {
-	has, err := repo.hasCID(cid)
+func (repo *repository) saveContent(id dto.ID, typeID int, content string) error {
+	has, err := repo.hasContentID(id)
 	if err != nil {
 		return err
 	}
@@ -24,13 +24,13 @@ func (repo *repository) saveContent(cid dto.ID, contentType int, content string)
 		return nil
 	}
 
-	stmt, err := repo.db.Prepare("insert into content(id, type, content) values (?, ?, ?)")
+	stmt, err := repo.db.Prepare("insert into content(id, typeID, content) values (?, ?, ?)")
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(cid, contentType, content)
+	_, err = stmt.Exec(id, typeID, content)
 	if err != nil {
 		return err
 	}
@@ -38,14 +38,29 @@ func (repo *repository) saveContent(cid dto.ID, contentType int, content string)
 	return nil
 }
 
-func (repo *repository) hasCID(cid dto.ID) (bool, error) {
+func (repo *repository) hasDraftByPostID(postID dto.ID) (bool, error) {
+	stmt, err := repo.db.Prepare("select id from draft where id = ? limit 1")
+	if err != nil {
+		return false, err
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.Query(postID)
+	if err != nil {
+		return false, err
+	}
+	defer rows.Close()
+	return rows.Next(), nil
+}
+
+func (repo *repository) hasContentID(contentID dto.ID) (bool, error) {
 	stmt, err := repo.db.Prepare("select id from content where id = ? limit 1")
 	if err != nil {
 		return false, err
 	}
 	defer stmt.Close()
 
-	rows, err := stmt.Query(cid)
+	rows, err := stmt.Query(contentID)
 	if err != nil {
 		return false, err
 	}
@@ -61,18 +76,36 @@ func (repo *repository) lastCommit(postID dto.ID) (*commitDTO, error) {
 	defer stmt.Close()
 
 	var c commitDTO
-	err = stmt.QueryRow(postID).Scan(&c.ID, &c.PostID, &c.ContentID, &c.Created)
+	rows, err := stmt.Query(postID)
+	if err != nil {
+		return &c, err
+	}
+	defer rows.Close()
+
+	if !rows.Next() {
+		return &c, nil
+	}
+
+	err = rows.Scan(&c.ID, &c.PostID, &c.ContentID, &c.Created)
 	return &c, err
 }
 
-func (repo *repository) commit(commitID dto.ID, postID dto.ID, cid dto.ID) error {
+func (repo *repository) commit(commitID dto.ID, postID dto.ID, contentID dto.ID) error {
 	last, err := repo.lastCommit(postID)
 	if err != nil {
-		return nil
+		return err
 	}
 
-	if cid.Equal(last.ContentID) {
+	if contentID.Equal(last.ContentID) {
 		return errContentNotChange
+	}
+
+	has, err := repo.hasDraftByPostID(postID)
+	if err != nil {
+		return err
+	}
+	if !has {
+		return errDraftNotFound
 	}
 
 	tx, err := repo.db.Begin()
@@ -88,7 +121,7 @@ func (repo *repository) commit(commitID dto.ID, postID dto.ID, cid dto.ID) error
 		return err
 	}
 	defer stmt1.Close()
-	_, err = stmt1.Exec(commitID, postID, cid, now)
+	_, err = stmt1.Exec(commitID, postID, contentID, now)
 	if err != nil {
 		tx.Rollback()
 		return err

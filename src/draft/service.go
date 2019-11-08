@@ -4,36 +4,41 @@ import (
 	"database/sql"
 
 	"github.com/tecposter/tec-node-go/lib/dto"
+	"github.com/tecposter/tec-node-go/src/ws"
 )
 
 type service struct {
-	repo *repository
+	conn *ws.Connection
 }
 
-func newServ(db *sql.DB) *service {
-	return &service{repo: newRepo(db)}
+func newServ(c *ws.Connection) *service {
+	return &service{conn: c}
+}
+
+func (serv *service) DB() *sql.DB {
+	return serv.conn.DB()
 }
 
 func (serv *service) save(postIDBase58 string, content string) error {
 	postID := dto.Base58ToID(postIDBase58)
-	return serv.repo.save(postID, content)
+	return newRepo(serv.DB()).save(postID, content)
 }
 
 func (serv *service) fetch(postIDBase58 string) (*draftDTO, error) {
 	postID := dto.Base58ToID(postIDBase58)
-	return serv.repo.fetch(postID)
+	return newRepo(serv.DB()).fetch(postID)
 }
 
 func (serv *service) list() ([]draftDTO, error) {
-	return serv.repo.list()
+	return newRepo(serv.DB()).list()
 }
 
 func (serv *service) delete(postIDBase58 string) error {
 	postID := dto.Base58ToID(postIDBase58)
-	return serv.repo.delete(postID)
+	return newRepo(serv.DB()).delete(postID)
 }
 
 func (serv *service) has(postIDBase58 string) (bool, error) {
 	postID := dto.Base58ToID(postIDBase58)
-	return serv.repo.has(postID)
+	return newRepo(serv.DB()).has(postID)
 }

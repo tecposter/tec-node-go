@@ -1,10 +1,9 @@
 package draft
 
 import (
-	"database/sql"
 	"errors"
 
-	"github.com/tecposter/tec-node-go/lib/ws"
+	"github.com/tecposter/tec-node-go/src/ws"
 )
 
 const (
@@ -21,37 +20,28 @@ var (
 	errRequireContent = errors.New("Require content")
 )
 
-// Controller in draft
-type Controller struct {
-	serv *service
-}
-
-// NewCtrl returns Controller instance
-func NewCtrl(db *sql.DB) *Controller {
-	return &Controller{
-		serv: newServ(db),
-	}
-}
-
-// Handle handle ws response and request
-func (ctrl *Controller) Handle(res ws.IResponse, req ws.IRequest) {
-	switch req.CMD() {
+// Handle handle ws connection
+func Handle(c *ws.Connection) {
+	switch c.Req().CMD() {
 	case cmdSave:
-		ctrl.save(res, req)
+		save(c)
 	case cmdFetch:
-		ctrl.fetch(res, req)
+		fetch(c)
 	case cmdList:
-		ctrl.list(res)
+		list(c)
 	case cmdDelete:
-		ctrl.delete(res, req)
+		delete(c)
 	case cmdHas:
-		ctrl.has(res, req)
+		has(c)
 	default:
-		res.SetErr(errCmdNotFound)
+		c.Res().SetErr(errCmdNotFound)
 	}
 }
 
-func (ctrl *Controller) save(res ws.IResponse, req ws.IRequest) {
+func save(c *ws.Connection) {
+	req := c.Req()
+	res := c.Res()
+
 	postIDBase58, ok := req.Param("postID")
 	if !ok {
 		res.SetErr(errRequirePostID)
@@ -63,20 +53,23 @@ func (ctrl *Controller) save(res ws.IResponse, req ws.IRequest) {
 		return
 	}
 
-	err := ctrl.serv.save(postIDBase58.(string), content.(string))
+	err := newServ(c).save(postIDBase58.(string), content.(string))
 	if err != nil {
 		res.SetErr(err)
 	}
 }
 
-func (ctrl *Controller) fetch(res ws.IResponse, req ws.IRequest) {
+func fetch(c *ws.Connection) {
+	req := c.Req()
+	res := c.Res()
+
 	postIDBase58, ok := req.Param("postID")
 	if !ok {
 		res.SetErr(errRequirePostID)
 		return
 	}
 
-	d, err := ctrl.serv.fetch(postIDBase58.(string))
+	d, err := newServ(c).fetch(postIDBase58.(string))
 	if err != nil {
 		res.SetErr(err)
 		return
@@ -84,8 +77,10 @@ func (ctrl *Controller) fetch(res ws.IResponse, req ws.IRequest) {
 	res.Set("draft", d)
 }
 
-func (ctrl *Controller) list(res ws.IResponse) {
-	list, err := ctrl.serv.list()
+func list(c *ws.Connection) {
+	res := c.Res()
+
+	list, err := newServ(c).list()
 	if err != nil {
 		res.SetErr(err)
 		return
@@ -93,28 +88,34 @@ func (ctrl *Controller) list(res ws.IResponse) {
 	res.Set("drafts", list)
 }
 
-func (ctrl *Controller) delete(res ws.IResponse, req ws.IRequest) {
+func delete(c *ws.Connection) {
+	req := c.Req()
+	res := c.Res()
+
 	postIDBase58, ok := req.Param("postID")
 	if !ok {
 		res.SetErr(errRequirePostID)
 		return
 	}
 
-	err := ctrl.serv.delete(postIDBase58.(string))
+	err := newServ(c).delete(postIDBase58.(string))
 	if err != nil {
 		res.SetErr(err)
 		return
 	}
 }
 
-func (ctrl *Controller) has(res ws.IResponse, req ws.IRequest) {
+func has(c *ws.Connection) {
+	req := c.Req()
+	res := c.Res()
+
 	postIDBase58, ok := req.Param("postID")
 	if !ok {
 		res.SetErr(errRequirePostID)
 		return
 	}
 
-	has, err := ctrl.serv.has(postIDBase58.(string))
+	has, err := newServ(c).has(postIDBase58.(string))
 	if err != nil {
 		res.SetErr(err)
 		return

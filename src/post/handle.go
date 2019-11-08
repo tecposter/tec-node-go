@@ -1,11 +1,9 @@
 package post
 
 import (
-	"database/sql"
 	"errors"
-	// "log"
 
-	"github.com/tecposter/tec-node-go/lib/ws"
+	"github.com/tecposter/tec-node-go/src/ws"
 )
 
 const (
@@ -24,40 +22,31 @@ var (
 	errRequireContentType = errors.New("Require content type")
 )
 
-// Controller in post
-type Controller struct {
-	serv *service
-	// db *sql.DB
-}
-
-// NewCtrl return Ctroller instance
-func NewCtrl(db *sql.DB) *Controller {
-	return &Controller{serv: newServ(db)}
-}
-
-// Handle handle ws response and request in post
-func (ctrl *Controller) Handle(res ws.IResponse, req ws.IRequest) {
-	switch req.CMD() {
+// Handle handle websoket response and request
+func Handle(c *ws.Connection) {
+	switch c.Req().CMD() {
 	case cmdCreate:
-		ctrl.create(res)
+		create(c)
 	case cmdCommit:
-		ctrl.commit(res, req)
+		commit(c)
 	default:
-		res.SetErr(errCmdNotFound)
+		c.Res().SetErr(errCmdNotFound)
 	}
 }
 
-func (ctrl *Controller) create(res ws.IResponse) {
-	postID, err := ctrl.serv.create()
-	if err != nil {
-		res.SetErr(err)
-		return
+func create(c *ws.Connection) {
+	postID, err := newServ(c).create()
+	if err == nil {
+		c.Res().Set("postID", postID.Base58())
+	} else {
+		c.Res().SetErr(err)
 	}
-
-	res.Set("postID", postID.Base58())
 }
 
-func (ctrl *Controller) commit(res ws.IResponse, req ws.IRequest) {
+func commit(c *ws.Connection) {
+	req := c.Req()
+	res := c.Res()
+
 	postIDBase58, ok := req.Param("postID")
 	if !ok {
 		res.SetErr(errRequirePostID)
@@ -74,7 +63,7 @@ func (ctrl *Controller) commit(res ws.IResponse, req ws.IRequest) {
 		return
 	}
 
-	err := ctrl.serv.commit(
+	err := newServ(c).commit(
 		postIDBase58.(string),
 		contentType.(string),
 		content.(string),

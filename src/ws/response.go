@@ -1,4 +1,4 @@
-package app
+package ws
 
 import (
 	"encoding/json"
@@ -11,7 +11,8 @@ type responseDTO struct {
 	Data   map[string]interface{} `json:"data"`
 }
 
-type wsResponse struct {
+// Response websoket response
+type Response struct {
 	inner *responseDTO
 	err   error
 }
@@ -25,8 +26,8 @@ var (
 	errEmpty = errors.New("Empty")
 )
 
-func newRes(cmd string) *wsResponse {
-	r := &wsResponse{
+func newRes(cmd string) *Response {
+	r := &Response{
 		inner: &responseDTO{
 			CMD:    cmd,
 			Status: errorStatus,
@@ -37,13 +38,14 @@ func newRes(cmd string) *wsResponse {
 	return r
 }
 
-func newErrRes(err error) *wsResponse {
+func newErrRes(err error) *Response {
 	r := newRes("unknown")
 	r.SetErr(err)
 	return r
 }
 
-func (res *wsResponse) Marshal() ([]byte, error) {
+// Marshal returns JSON encoding
+func (res *Response) Marshal() ([]byte, error) {
 	if res.err == nil {
 		res.inner.Status = okStatus
 	} else {
@@ -54,20 +56,24 @@ func (res *wsResponse) Marshal() ([]byte, error) {
 	return b, err
 }
 
-func (res *wsResponse) SetErr(err error) {
+// SetErr sets error response
+func (res *Response) SetErr(err error) {
 	res.err = err
 }
 
-func (res *wsResponse) Set(key string, val interface{}) {
+// Set sets response value of key
+func (res *Response) Set(key string, val interface{}) {
 	res.inner.Data[key] = val
 }
 
-func (res *wsResponse) Has(key string) bool {
+// Has checks whether has key
+func (res *Response) Has(key string) bool {
 	_, ok := res.inner.Data[key]
 	return ok
 }
 
-func (res *wsResponse) Load(d map[string]interface{}) {
+// Load loads response data
+func (res *Response) Load(d map[string]interface{}) {
 	for k, v := range d {
 		res.Set(k, v)
 	}
