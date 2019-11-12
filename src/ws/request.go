@@ -53,3 +53,9 @@ func (r *Request) Param(key string) (interface{}, bool) {
 	val, ok := r.inner.Params[key]
 	return val, ok
 }
+
+// ParamStr returns parameter as string by key
+func (r *Request) ParamStr(key string) (string, bool) {
+	val, ok := r.inner.Params[key]
+	return strings.TrimSpace(val.(string)), ok
+}

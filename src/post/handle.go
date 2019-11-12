@@ -27,8 +27,14 @@ func Handle(c *ws.Connection) {
 	switch c.Req().CMD() {
 	case cmdCreate:
 		create(c)
+	case cmdEdit:
+		edit(c)
+	case cmdFetch:
+		fetch(c)
 	case cmdCommit:
 		commit(c)
+	case cmdList:
+		list(c)
 	case cmdSearch:
 		search(c)
 	default:
@@ -43,6 +49,40 @@ func create(c *ws.Connection) {
 	} else {
 		c.Res().SetErr(err)
 	}
+}
+
+func edit(c *ws.Connection) {
+	req := c.Req()
+	res := c.Res()
+
+	postIDBase58, ok := req.ParamStr("postID")
+	if !ok {
+		res.SetErr(errRequirePostID)
+		return
+	}
+	err := newServ(c).edit(postIDBase58)
+	if err != nil {
+		res.SetErr(err)
+		return
+	}
+	res.Set("postID", postIDBase58)
+}
+
+func fetch(c *ws.Connection) {
+	req := c.Req()
+	res := c.Res()
+
+	postIDBase58, ok := req.ParamStr("postID")
+	if !ok {
+		res.SetErr(errRequirePostID)
+		return
+	}
+	p, err := newServ(c).fetch(postIDBase58)
+	if err != nil {
+		res.SetErr(err)
+		return
+	}
+	res.Set("post", p)
 }
 
 func commit(c *ws.Connection) {
@@ -73,6 +113,17 @@ func commit(c *ws.Connection) {
 	if err != nil {
 		res.SetErr(err)
 	}
+}
+
+func list(c *ws.Connection) {
+	res := c.Res()
+
+	list, err := newServ(c).list()
+	if err != nil {
+		res.SetErr(err)
+		return
+	}
+	res.Set("posts", list)
 }
 
 func search(c *ws.Connection) {

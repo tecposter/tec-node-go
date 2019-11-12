@@ -2,7 +2,6 @@ package post
 
 import (
 	"github.com/tecposter/tec-node-go/lib/dto"
-	"time"
 )
 
 const (
@@ -11,6 +10,32 @@ const (
 	typeText     = 3
 )
 
+type commitDTO struct {
+	ID        dto.ID `json:"id"`
+	PostID    dto.ID `json:"postID"`
+	ContentID dto.ID `json:"contentID"`
+	Created   int64  `json:"created"`
+}
+
+type postDTO struct {
+	ID        dto.ID `json:"id"`
+	CommitID  dto.ID `json:"commitID"`
+	ContentID dto.ID `json:"contentID"`
+	Content   string `json:"content"`
+	Created   int64  `json:"created"`
+	Changed   int64  `json:"changed"`
+}
+
+type postItemDTO struct {
+	ID        dto.ID `json:"id"`
+	CommitID  dto.ID `json:"commitID"`
+	ContentID dto.ID `json:"contentID"`
+	Title     string `json:"content"`
+	Created   int64  `json:"created"`
+	Changed   int64  `json:"changed"`
+}
+
+/*
 type contentDTO struct {
 	ID      dto.ID `json:"id"`
 	Type    int    `json:"type"`
@@ -22,13 +47,6 @@ func newContent(id dto.ID, contentType int, content string) *contentDTO {
 		ID:      id,
 		Type:    contentType,
 		Content: content}
-}
-
-type commitDTO struct {
-	ID        dto.ID `json:"id"`
-	PostID    dto.ID `json:"postID"`
-	ContentID dto.ID `json:"contentID"`
-	Created   int64  `json:"created"`
 }
 
 func newCommit(id dto.ID, postID dto.ID, contentID dto.ID) *commitDTO {
@@ -51,3 +69,4 @@ func newPost(id dto.ID, commitID dto.ID) *postDTO {
 		CommitID: commitID,
 		Created:  time.Now().UnixNano()}
 }
+*/

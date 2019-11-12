@@ -191,6 +191,80 @@ func (repo *repository) create(postID dto.ID) error {
 	return nil
 }
 
+func (repo *repository) edit(postID dto.ID) error {
+	has, err := repo.hasDraftByPostID(postID)
+	if err != nil {
+		return err
+	}
+	if has {
+		return nil
+	}
+
+	stmt, err := repo.db.Prepare("insert into draft(id, content, changed) values (?, ?, ?)")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	now := time.Now().UnixNano()
+	_, err = stmt.Exec(postID, "", now)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (repo *repository) fetch(postID dto.ID) (*postDTO, error) {
+	stmt, err := repo.db.Prepare(`select p.id, p.commitID, m.contentID, c.content, p.created, m.created changed
+	from post p
+	left join [commit] m on m.id = p.commitID
+	left join content c on c.id = m.contentID
+	where p.id = ? limit 1`)
+
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	var p postDTO
+	err = stmt.QueryRow(postID).Scan(&p.ID, &p.CommitID, &p.ContentID, &p.Content, &p.Created, &p.Changed)
+	return &p, err
+}
+
+func (repo *repository) list() ([]postItemDTO, error) {
+	stmt, err := repo.db.Prepare(`select p.id, p.commitID, m.contentID, c.content, p.created, m.created changed
+	from post p
+	left join [commit] m on m.id = p.commitID
+	left join content c on c.id = m.contentID`)
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	var arr []postItemDTO
+	rows, err := stmt.Query()
+	if err != nil {
+		return arr, err
+	}
+
+	for rows.Next() {
+		var p postItemDTO
+		var content string
+		err = stmt.QueryRow().Scan(&p.ID, &p.CommitID, &p.ContentID, &content, &p.Created, &p.Changed)
+		if err != nil {
+			return arr, err
+		}
+		p.Title = extractTitle(content)
+		arr = append(arr, p)
+	}
+	return arr, nil
+}
+
+func extractTitle(content string) string {
+	return content
+}
+
 /*
 tx, err := db.Begin()
 	if err != nil {

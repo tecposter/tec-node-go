@@ -35,6 +35,17 @@ func (s *service) create() (dto.ID, error) {
 	return postID, err
 }
 
+func (s *service) edit(postIDBase58 string) error {
+	postID := dto.Base58ToID(postIDBase58)
+	err := newRepo(s.DB()).edit(postID)
+	return err
+}
+
+func (s *service) fetch(postIDBase58 string) (*postDTO, error) {
+	postID := dto.Base58ToID(postIDBase58)
+	return newRepo(s.DB()).fetch(postID)
+}
+
 func (s *service) commit(postIDBase58 string, contentType string, content string) error {
 	postID := dto.Base58ToID(postIDBase58)
 	contentID := dto.GenContentID(content)
@@ -58,6 +69,10 @@ func (s *service) commit(postIDBase58 string, contentType string, content string
 
 	searcher.Index(postID.Base58(), content)
 	return nil
+}
+
+func (s *service) list() ([]postItemDTO, error) {
+	return newRepo(s.DB()).list()
 }
 
 func (s *service) search(query string) {

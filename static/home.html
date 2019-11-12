@@ -84,7 +84,11 @@ html {
   <div class="example">
     <pre>
 {"cmd": "post.create"}
-{"cmd": "post.commit", "params":{"postID": "5Cdib1WVXnH7ov23n72EMU", "contentType": "md", "content": "1111 2222 333"}}
+{"cmd": "post.edit", "params": {"postID": "5Cdib1WVXnH7ov23n72EMU"}}
+{"cmd": "post.fetch", "params": {"postID": "5Cdib1WVXnH7ov23n72EMU"}}
+{"cmd": "post.commit", "params": {"postID": "5Cdib1WVXnH7ov23n72EMU", "contentType": "md", "content": "1111 2222 333"}}
+{"cmd": "post.list"}
+{"cmd": "post.search", "params": {"query": "tec"}}
 {"cmd": "draft.save", "params":{"postID": "5Cdib1WVXnH7ov23n72EMU", "content": "1111 2222 333"}}
 {"cmd": "draft.list"}
 {"cmd": "draft.delete", "params":{"postID": "5Cdib1WVXnH7ov23n72EMU"}}
