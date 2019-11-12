@@ -1,53 +1,106 @@
 package searcher
 
 import (
+	// "fmt"
 	"log"
+	// "strconv"
 
 	"github.com/go-ego/riot"
 	"github.com/go-ego/riot/types"
 )
 
+// Item search.Item
+type Item struct {
+	PostID  string
+	Content string
+}
+
 var (
 	searcher = riot.Engine{}
 )
 
-func Init() {
+// Init inits searcher
+func Init(indexDir string) {
 	searcher.Init(types.EngineOpts{
-		NotUseGse: true,
+		PinYin: true,
+		IndexerOpts: &types.IndexerOpts{
+			IndexType: types.DocIdsIndex,
+		},
+		UseStore:    true,
+		StoreFolder: indexDir,
+		GseDict:     "data/dict/dictionary.txt",
 	})
 
-	text := "Google Is Experimenting With Virtual Reality Advertising"
-	text1 := `Google accidentally pushed Bluetooth update for Home
-			speaker early`
-	text2 := `Google is testing another Search results layout with 
-					rounded cards, new colors, and the 4 mysterious colored dots again`
-
-	// Add the document to the index, docId starts at 1
-	searcher.Index("1", types.DocData{Content: text})
-	searcher.Index("2", types.DocData{Content: text1}, false)
-	searcher.IndexDoc("3", types.DocData{Content: text2}, true)
-
-	// Wait for the index to refresh
 	searcher.Flush()
-	// engine.FlushIndex()
-
-	// The search output format is found in the types.SearchResp structure
-	log.Print(searcher.Search(types.SearchReq{Text: "google testing"}))
+	// testSearch()
 }
 
+/*
+func testSearch() {
+		text := "Google Is Experimenting With Virtual Reality Advertising"
+		text1 := `Google accidentally pushed Bluetooth update for Home
+						speaker early`
+		text2 := `Google is testing another Search results layout with
+								rounded cards, new colors, and the 4 mysterious colored dots again`
+		text3 := "searcher 是协程安全的"
+		text4 := "在路上, in the way"
+
+		// Add the document to the index, docId starts at 1
+		searcher.Index("1", types.DocData{Content: text})
+		searcher.Index("2", types.DocData{Content: text1}, false)
+		searcher.IndexDoc("3", types.DocData{Content: text2}, true)
+		searcher.Index("4", types.DocData{Content: text3})
+		searcher.Index("5", types.DocData{Content: text4})
+
+		// Wait for the index to refresh
+		searcher.Flush()
+		// engine.FlushIndex()
+
+		// The search output format is found in the types.SearchResp structure
+		// log.Print(searcher.Search(types.SearchReq{Text: "google testing"}))
+		// log.Print(searcher.Search(types.SearchReq{Text: "the way"}))
+		// log.Print(searcher.Search(types.SearchReq{Text: "安全"}))
+		// log.Print(searcher.Search(types.SearchReq{Text: "路上"}))
+	searcher.Flush()
+
+	log.Println(Search("google"))
+	log.Println(Search("rounded cards"))
+	log.Println(Search("安全"))
+	log.Println(Search("路上"))
+	log.Println(Search("way"))
+}
+*/
+
+// Close closes searcher
 func Close() {
 	searcher.Close()
 }
 
+// Index add index
 func Index(id, content string) {
 	log.Println("Index: ", id, content)
 	searcher.Index(id, types.DocData{Content: content})
 	searcher.Flush()
 }
 
-func Search(query string) types.SearchResp {
+// Search searchs by query
+func Search(query string) []Item {
 	log.Println("Search: ", query)
-	return searcher.Search(types.SearchReq{Text: query})
+	output := searcher.SearchDoc(types.SearchReq{Text: query})
+	res := []Item{}
+
+	for _, doc := range output.Docs {
+		// i, _ := strconv.Atoi(doc.DocId)
+
+		t := Item{
+			PostID:  doc.DocId,
+			Content: doc.Content,
+		}
+		res = append(res, t)
+		// log.Println(i, doc)
+		// fmt.Printf("%v %s\n\n", doc.Scores, lines[i])
+	}
+	return res
 }
 
 /*

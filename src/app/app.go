@@ -34,13 +34,13 @@ var (
 
 // Run run http server app
 func Run(jsonFile string) {
-	searcher.Init()
-	defer searcher.Close()
-
 	err := config.LoadFromJSONFile(jsonFile)
 	if err != nil {
 		log.Println("config error: ", err)
 	}
+
+	searcher.Init(getIndexDir())
+	defer searcher.Close()
 
 	http.HandleFunc("/", handleHome())
 	http.HandleFunc("/ws", handleWS())
@@ -96,5 +96,15 @@ func newDB() (*sql.DB, error) {
 	dataDir := path.Join(config.BaseDir(), "/data")
 	iotool.MkdirIfNotExist(dataDir)
 	db, err := db.Open(dataDir)
+
+	log.Println("data Dir: ", dataDir)
 	return db, err
+}
+
+func getIndexDir() string {
+	indexDir := path.Join(config.BaseDir(), "/index")
+	iotool.MkdirIfNotExist(indexDir)
+
+	log.Println("Index Dir: ", indexDir)
+	return indexDir
 }
