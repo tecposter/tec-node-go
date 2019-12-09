@@ -134,5 +134,6 @@ func search(c *ws.Connection) {
 		query = ""
 	}
 
-	newServ(c).search(query.(string))
+	searchResult := newServ(c).search(query.(string))
+	c.Res().Set("searchResult", searchResult)
 }

@@ -2,7 +2,6 @@ package post
 
 import (
 	"database/sql"
-	"log"
 	"strings"
 
 	"github.com/tecposter/tec-node-go/lib/dto"
@@ -75,9 +74,9 @@ func (s *service) list() ([]postItemDTO, error) {
 	return newRepo(s.DB()).list()
 }
 
-func (s *service) search(query string) {
+func (s *service) search(query string) []searcher.Doc {
 	rs := searcher.Search(query)
-	log.Println(rs)
+	return rs
 }
 
 func toContentTypeID(contentType string) int {

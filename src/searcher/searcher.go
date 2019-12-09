@@ -9,9 +9,9 @@ import (
 	"github.com/go-ego/riot/types"
 )
 
-// Item search.Item
-type Item struct {
-	PostID  string
+// Doc search.Doc
+type Doc struct {
+	ID      string
 	Content string
 }
 
@@ -84,16 +84,16 @@ func Index(id, content string) {
 }
 
 // Search searchs by query
-func Search(query string) []Item {
+func Search(query string) []Doc {
 	log.Println("Search: ", query)
 	output := searcher.SearchDoc(types.SearchReq{Text: query})
-	res := []Item{}
+	res := []Doc{}
 
 	for _, doc := range output.Docs {
 		// i, _ := strconv.Atoi(doc.DocId)
 
-		t := Item{
-			PostID:  doc.DocId,
+		t := Doc{
+			ID:      doc.DocId,
 			Content: doc.Content,
 		}
 		res = append(res, t)
