@@ -1,5 +1,50 @@
 # The Go implementation of the TecPoster Server
 
+## Get started
+
+### install golang
+
+```
+sudo pacman -S go
+```
+
+~/.zprofile
+
+```
+export GOPATH="$HOME/space/go"
+export PATH="$PATH:$HOME/bin:$GOPATH/bin"
+```
+
+### dep
+
+<https://golang.github.io/dep>
+
+```
+go get -u github.com/golang/dep/cmd/dep
+dep init
+dep status
+dep ensure
+	dep ensure -add github.com/pkg/errors
+```
+
+
+### gcc and other tools in base-devel
+
+<https://linuxhint.com/compile_c_program_linux_gcc/>
+
+```
+sudo pacman -S base-devel
+gcc --version
+```
+
+### ref pkgs
+
+* github.com/gorilla/websocket
+* github.com/google/uuid
+* github.com/btcsuite/btcutil/base58
+* github.com/mattn/go-sqlite3
+
+
 ## APIs
 
 * post.commit
