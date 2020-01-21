@@ -30,7 +30,7 @@ type postItemDTO struct {
 	ID        dto.ID `json:"id"`
 	CommitID  dto.ID `json:"commitID"`
 	ContentID dto.ID `json:"contentID"`
-	Title     string `json:"content"`
+	Title     string `json:"title"`
 	Created   int64  `json:"created"`
 	Changed   int64  `json:"changed"`
 }

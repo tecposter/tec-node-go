@@ -233,10 +233,12 @@ func (repo *repository) fetch(postID dto.ID) (*postDTO, error) {
 }
 
 func (repo *repository) list() ([]postItemDTO, error) {
-	stmt, err := repo.db.Prepare(`select p.id, p.commitID, m.contentID, c.content, p.created, m.created changed
+	stmt, err := repo.db.Prepare(`select
+	p.id, IFNULL(p.commitID, x''), IFNULL(m.contentID, x''), IFNULL(c.content, ''), IFNULL(p.created, 0), IFNULL(m.created, 0)
 	from post p
 	left join [commit] m on m.id = p.commitID
-	left join content c on c.id = m.contentID`)
+	left join content c on c.id = m.contentID
+	order by m.created desc`)
 	if err != nil {
 		return nil, err
 	}
@@ -251,7 +253,7 @@ func (repo *repository) list() ([]postItemDTO, error) {
 	for rows.Next() {
 		var p postItemDTO
 		var content string
-		err = stmt.QueryRow().Scan(&p.ID, &p.CommitID, &p.ContentID, &content, &p.Created, &p.Changed)
+		err = rows.Scan(&p.ID, &p.CommitID, &p.ContentID, &content, &p.Created, &p.Changed)
 		if err != nil {
 			return arr, err
 		}

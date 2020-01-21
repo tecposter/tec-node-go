@@ -34,6 +34,7 @@ var (
 
 // Run run http server app
 func Run(jsonFile string) {
+	log.Println("config file: ", jsonFile)
 	err := config.LoadFromJSONFile(jsonFile)
 	if err != nil {
 		log.Println("config error: ", err)
@@ -45,6 +46,7 @@ func Run(jsonFile string) {
 	http.HandleFunc("/", handleHome())
 	http.HandleFunc("/ws", handleWS())
 
+	log.Println("bind addr: ", config.BindAddr())
 	err = http.ListenAndServe(config.BindAddr(), nil)
 	if err != nil {
 		log.Fatal("app.Run: ", err)
