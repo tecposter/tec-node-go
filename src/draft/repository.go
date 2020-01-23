@@ -30,14 +30,14 @@ func (repo *repository) save(postID dto.ID, content string) error {
 		return errPostIDNotExists
 	}
 
-	stmt, err := repo.db.Prepare("update draft set changed = ?, content = ? where id = ?")
+	stmt, err := repo.db.Prepare("update draft set drafted = ?, content = ? where id = ?")
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
 
-	changed := time.Now().UnixNano()
-	res, err := stmt.Exec(changed, content, postID)
+	drafted := time.Now().UnixNano()
+	res, err := stmt.Exec(drafted, content, postID)
 	if err != nil {
 		return err
 	}
@@ -69,20 +69,20 @@ func (repo *repository) has(id dto.ID) (bool, error) {
 }
 
 func (repo *repository) fetch(id dto.ID) (*draftDTO, error) {
-	stmt, err := repo.db.Prepare("select id, changed, content from draft where id = ? limit 1")
+	stmt, err := repo.db.Prepare("select id, drafted, content from draft where id = ? limit 1")
 	if err != nil {
 		return nil, err
 	}
 	defer stmt.Close()
 
 	var d draftDTO
-	err = stmt.QueryRow(id).Scan(&d.ID, &d.Changed, &d.Content)
+	err = stmt.QueryRow(id).Scan(&d.ID, &d.Drafted, &d.Content)
 	return &d, err
 }
 
 func (repo *repository) list() ([]draftDTO, error) {
 	var arr []draftDTO
-	stmt, err := repo.db.Prepare("select id, changed, content from draft")
+	stmt, err := repo.db.Prepare("select id, drafted, content from draft")
 	if err != nil {
 		return arr, err
 	}
@@ -96,7 +96,7 @@ func (repo *repository) list() ([]draftDTO, error) {
 
 	for rows.Next() {
 		var d draftDTO
-		err = rows.Scan(&d.ID, &d.Changed, &d.Content)
+		err = rows.Scan(&d.ID, &d.Drafted, &d.Content)
 		if err != nil {
 			return arr, err
 		}

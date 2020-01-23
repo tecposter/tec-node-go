@@ -16,13 +16,13 @@ var sqlStmt = `
 create table post (
 	id BLOB not null primary key,
 	commitID BLOB not null,
-	created NUMERIC not null
+	posted NUMERIC not null
 );
 create table [commit] (
 	id BLOB not null primary key,
 	postID BLOB not null,
 	contentID BLOB not null,
-	created NUMERIC not null
+	committed NUMERIC not null
 );
 create table content (
 	id BLOB not null primary key,
@@ -32,7 +32,7 @@ create table content (
 create table draft (
 	id BLOB not null primary key,
 	content TEXT,
-	changed NUMERIC not null
+	drafted NUMERIC not null
 );
 
 create index idx_commit_postID on [commit] (postID);

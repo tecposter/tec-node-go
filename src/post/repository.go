@@ -69,7 +69,7 @@ func (repo *repository) hasContentID(contentID dto.ID) (bool, error) {
 }
 
 func (repo *repository) lastCommit(postID dto.ID) (*commitDTO, error) {
-	stmt, err := repo.db.Prepare("select id, postID, contentID, created from [commit] where postID = ? order by created desc limit 1")
+	stmt, err := repo.db.Prepare("select id, postID, contentID, committed from [commit] where postID = ? order by committed desc limit 1")
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +86,7 @@ func (repo *repository) lastCommit(postID dto.ID) (*commitDTO, error) {
 		return &c, nil
 	}
 
-	err = rows.Scan(&c.ID, &c.PostID, &c.ContentID, &c.Created)
+	err = rows.Scan(&c.ID, &c.PostID, &c.ContentID, &c.Committed)
 	return &c, err
 }
 
@@ -115,7 +115,7 @@ func (repo *repository) commit(commitID dto.ID, postID dto.ID, contentID dto.ID)
 	defer tx.Commit()
 
 	now := time.Now().UnixNano()
-	stmt1, err := tx.Prepare("insert into [commit](id, postID, contentID, created) values (?, ?, ?, ?)")
+	stmt1, err := tx.Prepare("insert into [commit](id, postID, contentID, committed) values (?, ?, ?, ?)")
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -155,40 +155,48 @@ func (repo *repository) commit(commitID dto.ID, postID dto.ID, contentID dto.ID)
 	return nil
 }
 
-func (repo *repository) create(postID dto.ID) error {
+func (repo *repository) create(postID dto.ID) (*postDTO, error) {
 	tx, err := repo.db.Begin()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer tx.Commit()
 
 	now := time.Now().UnixNano()
-	stmt1, err := tx.Prepare("insert into post(id, commitID, created) values (?, ?, ?)")
+	stmt1, err := tx.Prepare("insert into post(id, commitID, posted) values (?, ?, ?)")
 	if err != nil {
 		tx.Rollback()
-		return err
+		return nil, err
 	}
 	defer stmt1.Close()
 	_, err = stmt1.Exec(postID, dto.EmptyID(), now)
 	if err != nil {
 		tx.Rollback()
-		return err
+		return nil, err
 	}
 
-	stmt2, err := tx.Prepare("insert into draft(id, content, changed) values (?, ?, ?)")
+	stmt2, err := tx.Prepare("insert into draft(id, content, drafted) values (?, ?, ?)")
 	if err != nil {
 		tx.Rollback()
-		return err
+		return nil, err
 	}
 	defer stmt2.Close()
 	_, err = stmt2.Exec(postID, "", now)
 	if err != nil {
 		tx.Rollback()
-		return err
+		return nil, err
 	}
 
 	// err = tx.Commit()
-	return nil
+	return &postDTO{
+		ID:        postID,
+		CommitID:  dto.ID([]byte("")),
+		ContentID: dto.ID([]byte("")),
+		Content:   "",
+		Posted:    now,
+		Drafted:   0,
+		Committed: 0,
+	}, nil
 }
 
 func (repo *repository) edit(postID dto.ID) error {
@@ -200,7 +208,7 @@ func (repo *repository) edit(postID dto.ID) error {
 		return nil
 	}
 
-	stmt, err := repo.db.Prepare("insert into draft(id, content, changed) values (?, ?, ?)")
+	stmt, err := repo.db.Prepare("insert into draft(id, content, drafted) values (?, ?, ?)")
 	if err != nil {
 		return err
 	}
@@ -217,10 +225,11 @@ func (repo *repository) edit(postID dto.ID) error {
 
 func (repo *repository) fetch(postID dto.ID) (*postDTO, error) {
 	stmt, err := repo.db.Prepare(`select
-	p.id, IFNULL(p.commitID, x''), IFNULL(m.contentID, x''), IFNULL(c.content, ''), p.created, IFNULL(m.created, 0)
+	p.id, IFNULL(p.commitID, x''), IFNULL(m.contentID, x''), IFNULL(c.content, ''), p.posted, IFNULL(m.committed, 0), IFNULL(d.drafted, 0)
 	from post p
 	left join [commit] m on m.id = p.commitID
 	left join content c on c.id = m.contentID
+	left join draft d on d.id = p.id
 	where p.id = ? limit 1`)
 
 	if err != nil {
@@ -229,17 +238,18 @@ func (repo *repository) fetch(postID dto.ID) (*postDTO, error) {
 	defer stmt.Close()
 
 	var p postDTO
-	err = stmt.QueryRow(postID).Scan(&p.ID, &p.CommitID, &p.ContentID, &p.Content, &p.Created, &p.Changed)
+	err = stmt.QueryRow(postID).Scan(&p.ID, &p.CommitID, &p.ContentID, &p.Content, &p.Posted, &p.Committed, &p.Drafted)
 	return &p, err
 }
 
 func (repo *repository) list() ([]postItemDTO, error) {
 	stmt, err := repo.db.Prepare(`select
-	p.id, IFNULL(p.commitID, x''), IFNULL(m.contentID, x''), IFNULL(c.content, ''), IFNULL(p.created, 0), IFNULL(m.created, 0)
+	p.id, IFNULL(p.commitID, x''), IFNULL(m.contentID, x''), IFNULL(c.content, ''), IFNULL(p.posted, 0), IFNULL(m.committed, 0), IFNULL(d.drafted, 0)
 	from post p
 	left join [commit] m on m.id = p.commitID
 	left join content c on c.id = m.contentID
-	order by m.created desc`)
+	left join draft d on d.id = p.id
+	order by m.committed desc`)
 	if err != nil {
 		return nil, err
 	}
@@ -254,7 +264,7 @@ func (repo *repository) list() ([]postItemDTO, error) {
 	for rows.Next() {
 		var p postItemDTO
 		var content string
-		err = rows.Scan(&p.ID, &p.CommitID, &p.ContentID, &content, &p.Created, &p.Changed)
+		err = rows.Scan(&p.ID, &p.CommitID, &p.ContentID, &content, &p.Posted, &p.Committed, &p.Drafted)
 		if err != nil {
 			return arr, err
 		}

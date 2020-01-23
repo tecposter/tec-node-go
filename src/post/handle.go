@@ -43,9 +43,9 @@ func Handle(c *ws.Connection) {
 }
 
 func create(c *ws.Connection) {
-	postID, err := newServ(c).create()
+	p, err := newServ(c).create()
 	if err == nil {
-		c.Res().Set("postID", postID.Base58())
+		c.Res().Set("post", p)
 	} else {
 		c.Res().SetErr(err)
 	}

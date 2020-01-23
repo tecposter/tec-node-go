@@ -14,7 +14,7 @@ type commitDTO struct {
 	ID        dto.ID `json:"id"`
 	PostID    dto.ID `json:"postID"`
 	ContentID dto.ID `json:"contentID"`
-	Created   int64  `json:"created"`
+	Committed int64  `json:"committed"`
 }
 
 type postDTO struct {
@@ -22,8 +22,9 @@ type postDTO struct {
 	CommitID  dto.ID `json:"commitID"`
 	ContentID dto.ID `json:"contentID"`
 	Content   string `json:"content"`
-	Created   int64  `json:"created"`
-	Changed   int64  `json:"changed"`
+	Posted    int64  `json:"posted"`
+	Drafted   int64  `json:"drafted"`
+	Committed int64  `json:"committed"`
 }
 
 type postItemDTO struct {
@@ -31,8 +32,9 @@ type postItemDTO struct {
 	CommitID  dto.ID `json:"commitID"`
 	ContentID dto.ID `json:"contentID"`
 	Title     string `json:"title"`
-	Created   int64  `json:"created"`
-	Changed   int64  `json:"changed"`
+	Posted    int64  `json:"posted"`
+	Drafted   int64  `json:"drafted"`
+	Committed int64  `json:"committed"`
 }
 
 /*

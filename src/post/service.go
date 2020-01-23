@@ -24,14 +24,14 @@ func (s *service) DB() *sql.DB {
 	return s.conn.DB()
 }
 
-func (s *service) create() (dto.ID, error) {
+func (s *service) create() (*postDTO, error) {
 	postID, err := uuid.NewID()
 	if err != nil {
-		return postID, err
+		return nil, err
 	}
 
-	err = newRepo(s.DB()).create(postID)
-	return postID, err
+	post, err := newRepo(s.DB()).create(postID)
+	return post, err
 }
 
 func (s *service) edit(postIDBase58 string) error {

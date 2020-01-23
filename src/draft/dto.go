@@ -7,14 +7,14 @@ import (
 
 type draftDTO struct {
 	ID      dto.ID `json:"id"`
-	Changed int64  `json:"changed"`
+	Drafted int64  `json:"drafted"`
 	Content string `json:"content"`
 }
 
 func newDraft(id dto.ID, content string) *draftDTO {
 	return &draftDTO{
 		ID:      id,
-		Changed: time.Now().UnixNano(),
+		Drafted: time.Now().UnixNano(),
 		Content: content}
 }
 
@@ -24,6 +24,6 @@ func (d *draftDTO) Title() string {
 
 type draftItemDTO struct {
 	ID      dto.ID `json:"id"`
-	Changed int64  `json:"changed"`
+	Drafted int64  `json:"drafted"`
 	Title   string `json:"title"`
 }
