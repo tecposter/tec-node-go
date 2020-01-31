@@ -225,7 +225,7 @@ func (repo *repository) edit(postID dto.ID) error {
 
 func (repo *repository) fetch(postID dto.ID) (*postDTO, error) {
 	stmt, err := repo.db.Prepare(`select
-	p.id, IFNULL(p.commitID, x''), IFNULL(m.contentID, x''), IFNULL(c.content, ''), p.posted, IFNULL(m.committed, 0), IFNULL(d.drafted, 0)
+	p.id, IFNULL(p.commitID, x''), IFNULL(m.contentID, x''), IFNULL(c.content, ''), p.posted, IFNULL(m.committed, 0), IFNULL(d.drafted, 0), IFNULL(d.content, '')
 	from post p
 	left join [commit] m on m.id = p.commitID
 	left join content c on c.id = m.contentID
@@ -238,7 +238,7 @@ func (repo *repository) fetch(postID dto.ID) (*postDTO, error) {
 	defer stmt.Close()
 
 	var p postDTO
-	err = stmt.QueryRow(postID).Scan(&p.ID, &p.CommitID, &p.ContentID, &p.Content, &p.Posted, &p.Committed, &p.Drafted)
+	err = stmt.QueryRow(postID).Scan(&p.ID, &p.CommitID, &p.ContentID, &p.Content, &p.Posted, &p.Committed, &p.Drafted, &p.Draft)
 	return &p, err
 }
 

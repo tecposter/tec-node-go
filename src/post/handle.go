@@ -60,12 +60,18 @@ func edit(c *ws.Connection) {
 		res.SetErr(errRequirePostID)
 		return
 	}
-	err := newServ(c).edit(postIDBase58)
+	serv := newServ(c)
+	err := serv.edit(postIDBase58)
 	if err != nil {
 		res.SetErr(err)
 		return
 	}
-	res.Set("postID", postIDBase58)
+	p, err := serv.fetch(postIDBase58)
+	if err != nil {
+		res.SetErr(err)
+		return
+	}
+	res.Set("post", p)
 }
 
 func fetch(c *ws.Connection) {
