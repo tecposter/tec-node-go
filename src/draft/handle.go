@@ -1,9 +1,7 @@
 package draft
 
 import (
-	// "encoding/json"
 	"errors"
-	"fmt"
 
 	"github.com/tecposter/tec-node-go/src/ws"
 )

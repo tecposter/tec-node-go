@@ -95,30 +95,39 @@ func commit(c *ws.Connection) {
 	req := c.Req()
 	res := c.Res()
 
-	postIDBase58, ok := req.Param("postID")
+	postIDBase58, ok := req.ParamStr("postID")
 	if !ok {
 		res.SetErr(errRequirePostID)
 		return
 	}
-	contentType, ok := req.Param("contentType")
+	contentType, ok := req.ParamStr("contentType")
 	if !ok {
 		res.SetErr(errRequireContentType)
 		return
 	}
-	content, ok := req.Param("content")
+	content, ok := req.ParamStr("content")
 	if !ok {
 		res.SetErr(errRequireContent)
 		return
 	}
 
-	err := newServ(c).commit(
-		postIDBase58.(string),
-		contentType.(string),
-		content.(string),
+	serv := newServ(c)
+	err := serv.commit(
+		postIDBase58,
+		contentType,
+		content,
 	)
 	if err != nil {
 		res.SetErr(err)
+		return
 	}
+
+	p, err := serv.fetch(postIDBase58)
+	if err != nil {
+		res.SetErr(err)
+		return
+	}
+	res.Set("post", p)
 }
 
 func list(c *ws.Connection) {

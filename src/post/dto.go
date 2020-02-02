@@ -21,6 +21,7 @@ type postDTO struct {
 	ID        dto.ID `json:"id"`
 	CommitID  dto.ID `json:"commitID"`
 	ContentID dto.ID `json:"contentID"`
+	Title     string `json:"title"`
 	Content   string `json:"content"`
 	Draft     string `json:"draft"`
 	Posted    int64  `json:"posted"`

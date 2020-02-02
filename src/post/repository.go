@@ -2,6 +2,7 @@ package post
 
 import (
 	"database/sql"
+	"regexp"
 	"time"
 
 	"github.com/tecposter/tec-node-go/lib/dto"
@@ -239,6 +240,7 @@ func (repo *repository) fetch(postID dto.ID) (*postDTO, error) {
 
 	var p postDTO
 	err = stmt.QueryRow(postID).Scan(&p.ID, &p.CommitID, &p.ContentID, &p.Content, &p.Posted, &p.Committed, &p.Drafted, &p.Draft)
+	p.Title = extractTitle(p.Content)
 	return &p, err
 }
 
@@ -275,10 +277,33 @@ func (repo *repository) list() ([]postItemDTO, error) {
 }
 
 func extractTitle(content string) string {
-	return content
+	re := regexp.MustCompile(`# ([^#\n]+)\n`)
+	founds := re.FindStringSubmatch(content)
+	if len(founds) >= 2 {
+		return founds[1]
+	}
+
+	return ""
 }
 
 /*
+func extractMdTitle(content string) string {
+    //$matched = preg_match('/# ([^#\n]+)/', $content, $matches);
+    re := regexp.MustCompile(`# ([^#\n]+)\n`)
+    founds := re.FindStringSubmatch(content)
+
+    //fmt.Println(founds)
+    if len(founds) >= 2 {
+        return founds[1]
+    } else {
+		l := len(content)
+		if l > 100 {
+			return content[0:100]
+		} else {
+			return content
+		}
+    }
+}
 tx, err := db.Begin()
 	if err != nil {
 		log.Fatal(err)
